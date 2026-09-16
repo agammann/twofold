@@ -41,7 +41,7 @@ export const Report = z.object({
   betterAnswer: z.string().min(40).max(5000).describe('A complete standalone answer to the original question, including a concise explanation. Never just a letter, winner label, or reference to another answer.'),
   limitations: z.array(text).max(5).describe('Only concrete limitations relevant to this question. An empty array is valid; do not manufacture caveats.'),
   rationale: text,
-  verdict: z.enum(['A', 'B', 'both', 'neither', 'depends', 'insufficient']).describe('A or B: a substantive supported advantage, never merely the less wrong of two false answers. both: both substantively correct. neither: evidence establishes both central answers are false. depends: the choice changes with a stated condition or goal. insufficient: missing evidence prevents deciding truth; unsupported does not mean disproved.'),
+  verdict: z.enum(['A', 'B', 'both', 'neither', 'depends', 'insufficient']).describe('A or B: a substantive supported advantage, never merely the less wrong of two false answers. both: both correctly answer the question under the same supplied conditions. neither: evidence establishes both central answers are false. depends: different valid recommendations require an unspecified deciding goal or condition; this takes precedence over both. Apply an explicitly supplied priority instead of inventing alternatives. insufficient: missing evidence prevents deciding truth; unsupported does not mean disproved.'),
   headline: text,
   confidence: z.enum(['low', 'medium', 'high']),
   confidenceReason: text,

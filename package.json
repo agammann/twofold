@@ -1,6 +1,6 @@
 {
   "name": "twofold-answer-comparison",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "private": true,
   "type": "module",
   "description": "Compare two answers, examine their stated reasoning, and evaluate what the evidence supports.",

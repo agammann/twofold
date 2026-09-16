@@ -1,6 +1,6 @@
 # Verification evidence
 
-For the subsequent version 1.0.1 update and its 21 deterministic tests, see [comparison reliability](RELIABILITY.md). The evidence below describes the original 1.0.0 release.
+For the subsequent reliability updates and their measured checks, see [comparison reliability](RELIABILITY.md). The evidence below describes the original 1.0.0 release.
 
 Verified September 15, 2026 (Pacific time; September 16 UTC). These checks establish the observed build and workflow, not universal evaluation accuracy or freedom from vulnerabilities.
 

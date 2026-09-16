@@ -666,6 +666,443 @@
           }
         }
       ]
+    },
+    {
+      "stage": "Version 1.0.2: precedence for conditional recommendations; eleven cases with the stricter courier rubric declared before the run",
+      "createdAt": "2026-09-16T05:20:45.658Z",
+      "model": "gpt-5.4-mini",
+      "summary": {
+        "total": 22,
+        "passed": 22,
+        "failed": 0,
+        "orderChecks": [
+          {
+            "caseId": "percentage-bases",
+            "consistent": true,
+            "original": "B",
+            "reversedMapped": "B"
+          },
+          {
+            "caseId": "both-correct",
+            "consistent": true,
+            "original": "both",
+            "reversedMapped": "both"
+          },
+          {
+            "caseId": "both-wrong",
+            "consistent": true,
+            "original": "neither",
+            "reversedMapped": "neither"
+          },
+          {
+            "caseId": "identical-correct",
+            "consistent": true,
+            "original": "both",
+            "reversedMapped": "both"
+          },
+          {
+            "caseId": "identical-wrong",
+            "consistent": true,
+            "original": "neither",
+            "reversedMapped": "neither"
+          },
+          {
+            "caseId": "missing-observation",
+            "consistent": true,
+            "original": "insufficient",
+            "reversedMapped": "insufficient"
+          },
+          {
+            "caseId": "conditional-tradeoff",
+            "consistent": true,
+            "original": "depends",
+            "reversedMapped": "depends"
+          },
+          {
+            "caseId": "unknown-preference",
+            "consistent": true,
+            "original": "insufficient",
+            "reversedMapped": "insufficient"
+          },
+          {
+            "caseId": "storage-tradeoff",
+            "consistent": true,
+            "original": "depends",
+            "reversedMapped": "depends"
+          },
+          {
+            "caseId": "specified-priority",
+            "consistent": true,
+            "original": "B",
+            "reversedMapped": "B"
+          },
+          {
+            "caseId": "same-conditions-recommendation",
+            "consistent": true,
+            "original": "both",
+            "reversedMapped": "both"
+          }
+        ],
+        "orderConsistent": 11,
+        "usage": {
+          "inputTokens": 42482,
+          "outputTokens": 20412
+        }
+      },
+      "runs": [
+        {
+          "caseId": "percentage-bases",
+          "swapped": false,
+          "verdict": "B",
+          "score": {
+            "passed": true,
+            "expected": [
+              "B"
+            ],
+            "failures": []
+          },
+          "reasoningSteps": {
+            "A": 1,
+            "B": 1
+          }
+        },
+        {
+          "caseId": "percentage-bases",
+          "swapped": true,
+          "verdict": "A",
+          "score": {
+            "passed": true,
+            "expected": [
+              "A"
+            ],
+            "failures": []
+          },
+          "reasoningSteps": {
+            "A": 1,
+            "B": 1
+          }
+        },
+        {
+          "caseId": "both-correct",
+          "swapped": false,
+          "verdict": "both",
+          "score": {
+            "passed": true,
+            "expected": [
+              "both"
+            ],
+            "failures": []
+          },
+          "reasoningSteps": {
+            "A": 1,
+            "B": 1
+          }
+        },
+        {
+          "caseId": "both-correct",
+          "swapped": true,
+          "verdict": "both",
+          "score": {
+            "passed": true,
+            "expected": [
+              "both"
+            ],
+            "failures": []
+          },
+          "reasoningSteps": {
+            "A": 2,
+            "B": 2
+          }
+        },
+        {
+          "caseId": "both-wrong",
+          "swapped": false,
+          "verdict": "neither",
+          "score": {
+            "passed": true,
+            "expected": [
+              "neither"
+            ],
+            "failures": []
+          },
+          "reasoningSteps": {
+            "A": 1,
+            "B": 1
+          }
+        },
+        {
+          "caseId": "both-wrong",
+          "swapped": true,
+          "verdict": "neither",
+          "score": {
+            "passed": true,
+            "expected": [
+              "neither"
+            ],
+            "failures": []
+          },
+          "reasoningSteps": {
+            "A": 2,
+            "B": 2
+          }
+        },
+        {
+          "caseId": "identical-correct",
+          "swapped": false,
+          "verdict": "both",
+          "score": {
+            "passed": true,
+            "expected": [
+              "both"
+            ],
+            "failures": []
+          },
+          "reasoningSteps": {
+            "A": 0,
+            "B": 0
+          }
+        },
+        {
+          "caseId": "identical-correct",
+          "swapped": true,
+          "verdict": "both",
+          "score": {
+            "passed": true,
+            "expected": [
+              "both"
+            ],
+            "failures": []
+          },
+          "reasoningSteps": {
+            "A": 0,
+            "B": 0
+          }
+        },
+        {
+          "caseId": "identical-wrong",
+          "swapped": false,
+          "verdict": "neither",
+          "score": {
+            "passed": true,
+            "expected": [
+              "neither"
+            ],
+            "failures": []
+          },
+          "reasoningSteps": {
+            "A": 0,
+            "B": 0
+          }
+        },
+        {
+          "caseId": "identical-wrong",
+          "swapped": true,
+          "verdict": "neither",
+          "score": {
+            "passed": true,
+            "expected": [
+              "neither"
+            ],
+            "failures": []
+          },
+          "reasoningSteps": {
+            "A": 0,
+            "B": 0
+          }
+        },
+        {
+          "caseId": "missing-observation",
+          "swapped": false,
+          "verdict": "insufficient",
+          "score": {
+            "passed": true,
+            "expected": [
+              "insufficient"
+            ],
+            "failures": []
+          },
+          "reasoningSteps": {
+            "A": 0,
+            "B": 0
+          }
+        },
+        {
+          "caseId": "missing-observation",
+          "swapped": true,
+          "verdict": "insufficient",
+          "score": {
+            "passed": true,
+            "expected": [
+              "insufficient"
+            ],
+            "failures": []
+          },
+          "reasoningSteps": {
+            "A": 0,
+            "B": 0
+          }
+        },
+        {
+          "caseId": "conditional-tradeoff",
+          "swapped": false,
+          "verdict": "depends",
+          "score": {
+            "passed": true,
+            "expected": [
+              "depends"
+            ],
+            "failures": []
+          },
+          "reasoningSteps": {
+            "A": 1,
+            "B": 1
+          }
+        },
+        {
+          "caseId": "conditional-tradeoff",
+          "swapped": true,
+          "verdict": "depends",
+          "score": {
+            "passed": true,
+            "expected": [
+              "depends"
+            ],
+            "failures": []
+          },
+          "reasoningSteps": {
+            "A": 1,
+            "B": 1
+          }
+        },
+        {
+          "caseId": "unknown-preference",
+          "swapped": false,
+          "verdict": "insufficient",
+          "score": {
+            "passed": true,
+            "expected": [
+              "insufficient"
+            ],
+            "failures": []
+          },
+          "reasoningSteps": {
+            "A": 0,
+            "B": 0
+          }
+        },
+        {
+          "caseId": "unknown-preference",
+          "swapped": true,
+          "verdict": "insufficient",
+          "score": {
+            "passed": true,
+            "expected": [
+              "insufficient"
+            ],
+            "failures": []
+          },
+          "reasoningSteps": {
+            "A": 0,
+            "B": 0
+          }
+        },
+        {
+          "caseId": "storage-tradeoff",
+          "swapped": false,
+          "verdict": "depends",
+          "score": {
+            "passed": true,
+            "expected": [
+              "depends"
+            ],
+            "failures": []
+          },
+          "reasoningSteps": {
+            "A": 2,
+            "B": 1
+          }
+        },
+        {
+          "caseId": "storage-tradeoff",
+          "swapped": true,
+          "verdict": "depends",
+          "score": {
+            "passed": true,
+            "expected": [
+              "depends"
+            ],
+            "failures": []
+          },
+          "reasoningSteps": {
+            "A": 2,
+            "B": 2
+          }
+        },
+        {
+          "caseId": "specified-priority",
+          "swapped": false,
+          "verdict": "B",
+          "score": {
+            "passed": true,
+            "expected": [
+              "B"
+            ],
+            "failures": []
+          },
+          "reasoningSteps": {
+            "A": 2,
+            "B": 1
+          }
+        },
+        {
+          "caseId": "specified-priority",
+          "swapped": true,
+          "verdict": "A",
+          "score": {
+            "passed": true,
+            "expected": [
+              "A"
+            ],
+            "failures": []
+          },
+          "reasoningSteps": {
+            "A": 2,
+            "B": 1
+          }
+        },
+        {
+          "caseId": "same-conditions-recommendation",
+          "swapped": false,
+          "verdict": "both",
+          "score": {
+            "passed": true,
+            "expected": [
+              "both"
+            ],
+            "failures": []
+          },
+          "reasoningSteps": {
+            "A": 2,
+            "B": 2
+          }
+        },
+        {
+          "caseId": "same-conditions-recommendation",
+          "swapped": true,
+          "verdict": "both",
+          "score": {
+            "passed": true,
+            "expected": [
+              "both"
+            ],
+            "failures": []
+          },
+          "reasoningSteps": {
+            "A": 1,
+            "B": 1
+          }
+        }
+      ]
     }
   ]
 }
