@@ -1,10 +1,12 @@
 {
   "name": "twofold-answer-comparison",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "type": "module",
   "description": "Compare two answers, examine their stated reasoning, and evaluate what the evidence supports.",
-  "engines": { "node": ">=22.12.0" },
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "scripts": {
     "dev": "node server/index.mjs --dev",
     "build": "vite build",
@@ -12,6 +14,7 @@
     "setup": "node scripts/setup.mjs",
     "test": "node --test test/*.test.mjs",
     "test:live": "node scripts/live-check.mjs",
+    "eval:live": "node scripts/eval-live.mjs",
     "check:release": "node scripts/check-release.mjs"
   },
   "dependencies": {

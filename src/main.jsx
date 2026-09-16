@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { verdictLabels } from '../shared/labels.mjs';
+import { verdictLabels, reportMessages } from '../shared/labels.mjs';
 import { markdownReport } from '../shared/export.mjs';
 import './style.css';
 import './theme.css';
@@ -35,7 +35,7 @@ function Reasoning({ id, answer, name }) {
   return <section className="reasoning">
     <h3><span className={`letter letter-${id}`}>{id}</span>How {id} gets there {name && <span className="author">{name}</span>}</h3>
     <p className="conclusion">{answer.conclusion}</p>
-    <ol>{answer.reasoning.map((step,i)=><li key={i}><span className={`step-num letter-${id}`}>{i+1}</span><div><p>{step.explanation}</p><span className="basis">{step.basis==='stated'?'Stated in the answer':'Inferred assumption'}</span>{step.quote && <blockquote>{step.quote}</blockquote>}</div></li>)}</ol>
+    {answer.reasoning.length ? <ol>{answer.reasoning.map((step,i)=><li key={i}><span className={`step-num letter-${id}`}>{i+1}</span><div><p>{step.explanation}</p><span className="basis">{step.basis==='stated'?'Stated in the answer':'Inferred assumption'}</span>{step.quote && <blockquote>{step.quote}</blockquote>}</div></li>)}</ol> : <p className="muted">{reportMessages.reasoning}</p>}
     {answer.strengths.length>0 && <div className="qualities"><h4>What holds up</h4><ul>{answer.strengths.map((s,i)=><li key={i}>{s}</li>)}</ul></div>}
     {answer.weaknesses.length>0 && <div className="qualities"><h4>Where it falls short</h4><ul>{answer.weaknesses.map((s,i)=><li key={i}>{s}</li>)}</ul></div>}
   </section>;
@@ -58,12 +58,13 @@ function Results({ result, input, resultRef }) {
       <details><summary>Why this confidence?</summary><p>{result.confidenceReason}</p><p>Confidence is the evaluator’s assessment, not a measured probability.</p></details>
     </div>
     <div id="report-reasoning" className="reasoning-grid"><Reasoning id="A" answer={result.answerA} name={input.nameA}/><Reasoning id="B" answer={result.answerB} name={input.nameB}/></div>
-    <div className="differences"><h3>The decisive differences</h3><ul>{result.differences.map((d,i)=><li key={i}>{d}</li>)}</ul>{result.agreements.length>0 && <details><summary>Where they agree</summary><ul>{result.agreements.map((d,i)=><li key={i}>{d}</li>)}</ul></details>}</div>
+    <div className="differences"><h3>The decisive differences</h3>{result.differences.length ? <ul>{result.differences.map((d,i)=><li key={i}>{d}</li>)}</ul> : <p className="muted">{reportMessages.differences}</p>}{result.agreements.length>0 && <details><summary>Where they agree</summary><ul>{result.agreements.map((d,i)=><li key={i}>{d}</li>)}</ul></details>}</div>
     <section className="claims" id="report-claims"><h3>Check the claims</h3><p className="muted">Evidence and calculation are separated from the model’s assessment.</p>
+      {result.claims.length === 0 && <p>{reportMessages.claims}</p>}
       {result.claims.map((claim,i)=><article className="claim" key={i}><div className="claim-label"><span className={`assessment ${claim.assessment}`}>{claim.assessment}</span><span>Answer {claim.answer==='both'?'A + B':claim.answer}</span></div><div><h4>{claim.claim}</h4><p>{claim.explanation}</p><details className="claim-quote"><summary>See the original wording</summary><blockquote>{claim.quote}</blockquote></details><div className="claim-evidence"><span>{claim.basis}</span>{claim.sourceIds.map(id=>sources.has(id)&&<a key={id} href={sources.get(id).url} target="_blank" rel="noopener noreferrer">[{id}] {sources.get(id).title}</a>)}</div></div></article>)}
     </section>
     <section className="better-answer"><h3>A better answer</h3><p>{result.betterAnswer}</p></section>
-    <section className="limits"><h3>What remains uncertain</h3><ul>{result.limitations.map((l,i)=><li key={i}>{l}</li>)}</ul></section>
+    <section className="limits"><h3>What remains uncertain</h3>{result.limitations.length ? <ul>{result.limitations.map((l,i)=><li key={i}>{l}</li>)}</ul> : <p>{reportMessages.limitations}</p>}</section>
     <section id="report-sources" className="source-section"><h3>Sources</h3>{result.sources.length>0 ? <><p className="muted">Retrieval does not mean every source supports the verdict. Claim references above show which sources the evaluator used.</p><ol className="sources">{result.sources.map(s=><li key={s.id}><a href={s.url} target="_blank" rel="noopener noreferrer">[{s.id}] {s.title}</a><span>{new URL(s.url).hostname}</span></li>)}</ol></> : <p className="muted">{result.meta.webRequested?'Web checking did not return usable sources. The evaluation is not externally verified.':'No web sources were checked. Enable “Check web sources” before comparing to look for external evidence.'}</p>}</section>
     <p className="run-meta">{result.meta.model} · {new Date(result.meta.createdAt).toLocaleString()} · {result.meta.usage.inputTokens.toLocaleString()} input / {result.meta.usage.outputTokens.toLocaleString()} output tokens</p>
   </section>;

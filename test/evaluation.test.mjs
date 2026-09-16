@@ -4,6 +4,7 @@ import { collectSources, safeUrl, validateReport, evaluate } from '../server/eva
 import { Input, quoteOptions, reportSchemaFor } from '../shared/schema.mjs';
 import { markdownReport } from '../shared/export.mjs';
 import { input, report } from './fixtures.mjs';
+import { reportMessages } from '../shared/labels.mjs';
 
 test('bounds inputs and rejects extra fields',()=>{
   assert.equal(Input.safeParse({...input,answerA:' '.repeat(10)}).success,false);
@@ -37,6 +38,32 @@ test('generation schema constrains quotes to exact input excerpts',()=>{
 test('claim attribution must match the quoted answer',()=>{
   const forged=structuredClone(report);forged.claims[0].answer='A';
   assert.throws(()=>validateReport(forged,input,[]),/attributed answer/);
+});
+
+test('reports can honestly omit reasoning, differences, claims, and caveats',()=>{
+  const minimal=structuredClone(report);
+  minimal.answerA.reasoning=[];minimal.answerB.reasoning=[];
+  minimal.differences=[];minimal.claims=[];minimal.limitations=[];
+  assert.equal(reportSchemaFor(input).safeParse(minimal).success,true);
+  assert.doesNotThrow(()=>validateReport(minimal,input,[]));
+  const md=markdownReport(input,minimal);
+  for(const message of Object.values(reportMessages))assert.ok(md.includes(message));
+});
+
+test('identical answers cannot have a preferred author or invented differences',()=>{
+  const same={...input,answerA:'4.',answerB:'4.'};
+  const r=structuredClone(report);r.answerA.reasoning=[];r.answerB.reasoning=[];r.claims=[];r.differences=[];
+  for(const verdict of ['both','neither','depends','insufficient']){
+    r.verdict=verdict;assert.equal(reportSchemaFor(same).safeParse(r).success,true);
+    assert.doesNotThrow(()=>validateReport(r,same,[]));
+  }
+  for(const verdict of ['A','B']){
+    r.verdict=verdict;assert.equal(reportSchemaFor(same).safeParse(r).success,false);
+    assert.throws(()=>validateReport(r,same,[]),/Identical answers/);
+  }
+  r.verdict='both';r.differences=['A explains it better.'];
+  assert.equal(reportSchemaFor(same).safeParse(r).success,false);
+  assert.throws(()=>validateReport(r,same,[]),/Identical answers/);
 });
 test('calls live evaluator protocol without author labels and disables storage',async()=>{
   const calls=[];

@@ -42,6 +42,8 @@ Use **Load example** for a percentage comparison. It fills in the inputs only. P
 
 Twofold cannot see a person or bot's private thought processes. It evaluates the explanation actually supplied. One evaluator's judgment can be wrong; qualitative confidence is not a calibrated probability, and a citation's existence does not prove it supports a claim. Critical decisions still require checking the evidence yourself.
 
+The evaluator can leave reasoning, differences, claims, and limitations empty when the supplied answers do not justify those sections. The interface and export explain what was not identified. Identical answer text cannot produce a preferred author or content differences; identical answers can still both be wrong.
+
 ## Privacy and API key protection
 
 The OpenAI key remains in the local Node server. It is never sent to the browser, included in a report, or intentionally logged. The frontend calls only its local server. The app has no database, analytics, browser storage, or saved history; refreshing clears the current comparison.
@@ -89,6 +91,15 @@ Automated tests use controlled provider doubles and never spend API credits. Liv
 npm run test:live
 npm run test:live -- --web
 ```
+
+For a broader reliability check with fixed synthetic inputs:
+
+```sh
+npm run eval:live
+npm run eval:live -- --case identical-wrong
+```
+
+The full suite makes 16 paid API requests across eight cases, evaluating each in both answer orders with web research off. It checks expected verdicts, absent reasoning for bare conclusions, and verdict consistency after mapping reversed labels back. The two identical answer cases test repeat consistency. Generated reports stay in the ignored `evaluation-results/` directory. A successful suite is a small regression check, not proof of general accuracy or freedom from bias. See the [reliability evidence](docs/RELIABILITY.md) for the measured run and its limits.
 
 [GitHub Actions](https://github.com/agammann/twofold/actions/workflows/verify.yml) runs tests, build, release secret checks, and a production dependency audit on Windows and Ubuntu. No API credentials are required or supplied to CI.
 
