@@ -1,0 +1,27 @@
+{
+  "name": "twofold-answer-comparison",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Compare two answers, examine their stated reasoning, and evaluate what the evidence supports.",
+  "engines": { "node": ">=22.12.0" },
+  "scripts": {
+    "dev": "node server/index.mjs --dev",
+    "build": "vite build",
+    "start": "node server/index.mjs",
+    "setup": "node scripts/setup.mjs",
+    "test": "node --test test/*.test.mjs",
+    "test:live": "node scripts/live-check.mjs",
+    "check:release": "node scripts/check-release.mjs"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "openai": "^6.0.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "vite": "^7.1.0"
+  }
+}
