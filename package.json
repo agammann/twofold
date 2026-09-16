@@ -1,6 +1,6 @@
 {
   "name": "twofold-answer-comparison",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "private": true,
   "type": "module",
   "description": "Compare two answers, examine their stated reasoning, and evaluate what the evidence supports.",
@@ -9,7 +9,7 @@
   },
   "scripts": {
     "dev": "node server/index.mjs --dev",
-    "build": "vite build",
+    "build": "node scripts/build.mjs",
     "start": "node server/index.mjs",
     "setup": "node scripts/setup.mjs",
     "test": "node --test test/*.test.mjs",
@@ -25,6 +25,9 @@
     "zod": "^4.0.0"
   },
   "devDependencies": {
+    "drizzle-kit": "^0.31.10",
+    "drizzle-orm": "^0.45.2",
+    "esbuild": "^0.28.2",
     "vite": "^7.1.0"
   }
 }

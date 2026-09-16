@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
+import { flushSync } from 'react-dom';
 import { verdictLabels, reportMessages } from '../shared/labels.mjs';
 import { markdownReport } from '../shared/export.mjs';
 import './style.css';
@@ -75,7 +76,21 @@ function App() {
   const [busy,setBusy]=useState(false), [result,setResult]=useState(null), [resultInput,setResultInput]=useState(null), [elapsed,setElapsed]=useState(0);
   const [notice,setNotice]=useState('');
   const controller=useRef(null), resultRef=useRef(null), howRef=useRef(null);
-  useEffect(()=>{fetch('/api/status').then(r=>{if(!r.ok) throw Error(); return r.json();}).then(setStatus).catch(()=>setError('Cannot reach the local server. Restart Twofold and refresh this page.')); return ()=>controller.current?.abort();},[]);
+  useEffect(()=>{
+    const context=document.modelContext; if(!context?.registerTool)return;
+    const lifecycle=new AbortController();
+    const tool={name:'prepare_comparison',title:'Prepare a comparison',description:'Fill the visible question and two answers. Does not submit or call OpenAI. The visitor can review and press Compare answers.',
+      inputSchema:{type:'object',properties:{question:{type:'string',minLength:3,maxLength:4000},answerA:{type:'string',minLength:1,maxLength:12000},answerB:{type:'string',minLength:1,maxLength:12000}},required:['question','answerA','answerB'],additionalProperties:false},
+      annotations:{readOnlyHint:false,untrustedContentHint:true},execute(value){
+        if(controller.current)throw Error('Wait until the current comparison finishes.');
+        if(!value||Object.keys(value).some(k=>!['question','answerA','answerB'].includes(k))||['question','answerA','answerB'].some(k=>typeof value[k]!=='string'||value[k].trim().length<(k==='question'?3:1)||value[k].length>(k==='question'?4000:12000)))throw Error('Provide a question and two answers within the form limits.');
+        flushSync(()=>{setData({...empty,...value});setResult(null);setError('');setNotice('Answers prepared. Review them before comparing.');});
+        return {prepared:true,submitted:false};
+      }};
+    try{Promise.resolve(context.registerTool(tool,{signal:lifecycle.signal})).catch(()=>{});}catch{}
+    return()=>lifecycle.abort();
+  },[]);
+  useEffect(()=>{fetch('/api/status').then(r=>{if(!r.ok) throw Error(); return r.json();}).then(setStatus).catch(()=>setError('Cannot reach Twofold. Please refresh this page and try again.')); return ()=>controller.current?.abort();},[]);
   useEffect(()=>{if(!busy)return;const timer=setInterval(()=>setElapsed(s=>s+1),1000);return()=>clearInterval(timer);},[busy]);
   const update=(key,value)=>{setData(d=>({...d,[key]:value}));setResult(null);setNotice('');setError('');};
   async function compare(e) {
@@ -83,7 +98,7 @@ function App() {
     setBusy(true);setElapsed(0);setError('');setNotice('');setResult(null);
     const snapshot={...data}; controller.current=new AbortController();
     try {
-      const response=await fetch('/api/compare',{method:'POST',headers:{'Content-Type':'application/json','X-Twofold-Token':status?.token||''},body:JSON.stringify(snapshot),signal:controller.current.signal});
+      const response=await fetch('/api/compare',{method:'POST',headers:{'Content-Type':'application/json','X-Twofold-Token':status?.token||''},body:JSON.stringify({question:snapshot.question,answerA:snapshot.answerA,answerB:snapshot.answerB,web:snapshot.web}),signal:controller.current.signal});
       const body=await response.json(); if(!response.ok)throw Error(body.error||'Comparison failed.');
       setResult(body);setResultInput(snapshot);
       requestAnimationFrame(()=>{resultRef.current?.focus({preventScroll:true});resultRef.current?.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'start'});});
@@ -92,18 +107,18 @@ function App() {
   }
   return <><header className="topbar"><div className="nav-inner"><a className="brand" href="/" aria-label="Twofold home"><Icon type="logo"/>twofold</a><nav aria-label="Main navigation"><a href="#compare" className="active">Compare</a><button onClick={()=>howRef.current.showModal()}>How it works</button><a href="https://github.com/agammann/twofold" target="_blank" rel="noopener noreferrer">GitHub<Icon type="arrow" width="15" height="15"/></a></nav></div></header>
     <main id="compare"><div className="intro"><h1>Two answers. A clearer picture.</h1><p>Compare the reasoning. Check the claims. See what holds up.</p></div>
-    {status && !status.configured && <div className="setup-message" role="status"><strong>Connect OpenAI to start comparing.</strong> Run <code>npm run setup</code> in the project folder, then restart Twofold. Your key stays in your local server.</div>}
+    {status && !status.configured && <div className="setup-message" role="status">{status.hosted ? <><strong>Comparisons are temporarily unavailable.</strong> Please try again later.</> : <><strong>Connect OpenAI to start comparing.</strong> Run <code>npm run setup</code> in the project folder, then restart Twofold. Your key stays in your local server.</>}</div>}
     <form onSubmit={compare}><label className="question-label" htmlFor="question">The question</label><textarea className="question" id="question" value={data.question} required minLength={3} maxLength={4000} rows={1} onChange={e=>update('question',e.target.value)} placeholder="What question were both answers responding to?" disabled={busy}/>
       <div className="answer-grid"><AnswerEditor id="A" data={data} update={update} disabled={busy}/><AnswerEditor id="B" data={data} update={update} disabled={busy}/></div>
       <div className="form-actions"><div className="secondary-actions"><button className="quiet" type="button" disabled={busy} onClick={()=>{setData(d=>({...d,answerA:d.answerB,answerB:d.answerA,nameA:d.nameB,nameB:d.nameA}));setResult(null);setNotice('Answers swapped.');setError('');}}><Icon type="swap"/>Swap answers</button><button className="quiet" type="button" disabled={busy} onClick={()=>{setData({...example});setResult(null);setError('');setNotice('Example loaded. Compare to get a live evaluation.');}}><Icon type="file"/>Load example</button></div>
       <div className="primary-actions"><label className="web-option"><input type="checkbox" checked={data.web} onChange={e=>update('web',e.target.checked)} disabled={busy}/>Check web sources</label><button className="primary" type="submit" disabled={busy||!status?.configured}>{busy?'Comparing…':'Compare answers'}{busy?<span className="spinner"/>:<Icon type="arrow"/>}</button></div></div>
-      <p className="privacy">Your question and answers are sent to OpenAI only when you compare. API charges apply.{data.web?' Web checking also sends relevant queries to search providers.':''}</p>
+      <p className="privacy">Your question and answers are sent to OpenAI only when you compare. {status?.hosted ? `This public site offers ${status.dailyLimit} shared comparisons per day, resetting at midnight UTC. No API key is needed.` : 'API charges apply.'}{data.web?' Web checking also sends relevant queries to search providers.':''}</p>
     </form>
     {busy && <div className="progress" role="status" aria-live="polite"><div><strong>{data.web?'Checking sources and comparing the answers…':'Examining the arguments and claims…'}</strong><p>{elapsed}s elapsed. A comparison can take up to 3 minutes.</p></div><button className="quiet" onClick={()=>controller.current?.abort()}>Cancel</button></div>}
     {error && <div className="error" role="alert">{error}</div>}{notice && <p className="notice" role="status">{notice}</p>}
     {result ? <Results result={result} input={resultInput} resultRef={resultRef}/> : !busy && <section className="empty-result"><div className="empty-symbol"><Icon type="logo" width="32" height="32"/></div><h2>Make room for a second look.</h2><p>Add the same question and two answers from any person or bot.<br/>Your comparison will appear here, with the reasoning and evidence behind it.</p></section>}
-    <footer>An evaluation of the reasoning shown, not access to private thought processes.<span>Runs locally · No saved history · OpenAI evaluation</span></footer></main>
-    <dialog ref={howRef} aria-labelledby="how-title"><div className="dialog-header"><h2 id="how-title">How Twofold works</h2><button className="quiet" aria-label="Close explanation" onClick={()=>howRef.current.close()}><Icon type="close"/></button></div><ol className="how-steps"><li><strong>One question, two perspectives.</strong><p>Paste both answers, including their explanations. Names are optional, stay local, and are not sent to OpenAI.</p></li><li><strong>Examine the argument.</strong><p>OpenAI compares conclusions, assumptions, reasoning, and claims. Quoted steps must match the original text. Inferences are labeled.</p></li><li><strong>Follow the evidence.</strong><p>Optional web checking retrieves sources before evaluation. Only retrieved source URLs can appear as citations. A retrieved source is not automatically reliable.</p></li><li><strong>A verdict with room for nuance.</strong><p>Either answer, both, neither, conditional, or insufficient evidence. Confidence is qualitative. Evaluations can be wrong, and one model’s judgment is not proof.</p></li></ol><div className="dialog-note"><strong>Your data</strong><p>No database, analytics, or saved history. Inputs go to OpenAI when you compare; web checking can send search queries to search providers. API requests use store: false, but OpenAI’s provider retention policies still apply. Exported reports include your inputs. Your API key stays in the local server.</p><a href="https://developers.openai.com/api/docs/guides/your-data" target="_blank" rel="noopener noreferrer">Read OpenAI’s data controls</a></div></dialog>
+    <footer>An evaluation of the reasoning shown, not access to private thought processes.<span>{status?.hosted ? 'Hosted on OpenAI Sites' : 'Runs locally'} · No saved comparisons · OpenAI evaluation</span></footer></main>
+    <dialog ref={howRef} aria-labelledby="how-title"><div className="dialog-header"><h2 id="how-title">How Twofold works</h2><button className="quiet" aria-label="Close explanation" onClick={()=>howRef.current.close()}><Icon type="close"/></button></div><ol className="how-steps"><li><strong>One question, two perspectives.</strong><p>Paste both answers, including their explanations. Names are optional, stay local, and are not sent to OpenAI.</p></li><li><strong>Examine the argument.</strong><p>OpenAI compares conclusions, assumptions, reasoning, and claims. Quoted steps must match the original text. Inferences are labeled.</p></li><li><strong>Follow the evidence.</strong><p>Optional web checking retrieves sources before evaluation. Only retrieved source URLs can appear as citations. A retrieved source is not automatically reliable.</p></li><li><strong>A verdict with room for nuance.</strong><p>Either answer, both, neither, conditional, or insufficient evidence. Confidence is qualitative. Evaluations can be wrong, and one model’s judgment is not proof.</p></li></ol><div className="dialog-note"><strong>Your data</strong><p>{status?.hosted ? 'Comparison text and results are not saved by Twofold. The site stores only a shared usage count and last request time to enforce public limits. Hosting infrastructure may retain request metadata.' : 'No database, analytics, or saved history.'} Inputs go to OpenAI when you compare; web checking can send search queries to search providers. API requests use store: false, but OpenAI’s provider retention policies still apply. Exported reports include your inputs. {status?.hosted ? 'The project API key stays private on the hosted server. Visitors do not supply a key.' : 'Your API key stays in the local server.'}</p><a href="https://developers.openai.com/api/docs/guides/your-data" target="_blank" rel="noopener noreferrer">Read OpenAI’s data controls</a></div></dialog>
   </>;
 }
 

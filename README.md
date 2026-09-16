@@ -4,7 +4,9 @@
 
 Twofold compares answers from two people or bots to the same question. Paste the question and both answers, then examine the reasoning, disputed claims, evidence, and a verdict that explains what holds up.
 
-The app runs on your computer. Evaluations use your own OpenAI API key. There is no hosted comparison service, account system, or shared API key.
+**[Open Twofold online](https://twofold.alx21.chatgpt.site)** to compare answers in your browser. No installation or API key is required for the public site. Public usage is limited to 30 shared comparisons per UTC day and one new comparison every 10 seconds. Failed or canceled requests can consume a slot.
+
+You can also run your own copy locally with your own OpenAI API key using the instructions below. The public site and local app use the same evaluator.
 
 ![Twofold local application](docs/twofold-desktop.png)
 
@@ -46,7 +48,9 @@ The evaluator can leave reasoning, differences, claims, and limitations empty wh
 
 ## Privacy and API key protection
 
-The OpenAI key remains in the local Node server. It is never sent to the browser, included in a report, or intentionally logged. The frontend calls only its local server. The app has no database, analytics, browser storage, or saved history; refreshing clears the current comparison.
+On the public site, the project key is a private Sites runtime secret. The site stores only a shared usage counter, UTC day, and last request time; it does not save comparison text or results. Hosting infrastructure may retain request metadata.
+
+For a local copy, the OpenAI key remains in the local Node server. It is never sent to the browser, included in a report, or intentionally logged. The frontend calls only its local server. The local app has no database, analytics, browser storage, or saved history; refreshing clears the current comparison.
 
 When you compare, the question and answer text go to OpenAI. Optional author names stay local and are omitted from provider requests. Web checking may send relevant queries through OpenAI's search tools to search providers. Requests use `store: false`; this does not override [OpenAI's data retention policies](https://developers.openai.com/api/docs/guides/your-data). Exported reports contain your supplied inputs, so share them deliberately.
 
@@ -102,6 +106,10 @@ npm run eval:live -- --case identical-wrong
 The full suite makes 22 paid API requests across eleven cases, evaluating each in both answer orders with web research off. It checks expected verdicts, absent reasoning for bare conclusions, and verdict consistency after mapping reversed labels back. The two identical answer cases test repeat consistency. Generated reports stay in the ignored `evaluation-results/` directory. A successful suite is a small regression check, not proof of general accuracy or freedom from bias. See the [reliability evidence](docs/RELIABILITY.md) for the measured run and its limits.
 
 [GitHub Actions](https://github.com/agammann/twofold/actions/workflows/verify.yml) runs tests, build, release secret checks, and a production dependency audit on Windows and Ubuntu. No API credentials are required or supplied to CI.
+
+## Public hosting
+
+The public OpenAI Sites edition uses a Cloudflare Worker and a single D1 usage row. Runtime secrets stay outside source and build artifacts. An atomic database statement reserves capacity before each evaluation, so separate server instances share the same limit. See [hosted operation and checks](docs/HOSTING.md).
 
 ## How it is built
 

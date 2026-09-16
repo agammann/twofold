@@ -26,7 +26,7 @@ const walk=(dir)=>{for(const e of readdirSync(path.join(root,dir),{withFileTypes
 if(existsSync(path.join(root,'dist')))walk('dist');else failures.push('Build output is missing.');
 if(process.argv.includes('--http')){
   const base=`http://127.0.0.1:${process.env.PORT||3210}`;
-  for(const p of ['/.env.local','/.env','/.git/config','/server/index.mjs','/scripts/setup.mjs','/@fs/etc/passwd']){
+  for(const p of ['/.env.local','/.env','/.git/config','/server/index.mjs','/server/index.js','/.openai/hosting.json','/db/schema.ts','/scripts/setup.mjs','/@fs/etc/passwd']){
     const r=await fetch(`${base}${p}`);const body=await r.text();
     if(r.status!==404)failures.push(`${p}: expected 404, received ${r.status}`);
     if(key&&body.includes(key))failures.push(`${p}: configured key exposed`);

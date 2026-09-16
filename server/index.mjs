@@ -21,6 +21,7 @@ if (dev) {
 } else {
   if (!existsSync(path.join(root,'dist/index.html'))) throw new Error('Build Twofold first with npm run build.');
   app.use((req,res,next) => { res.set('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'"); next(); });
+  app.use('/server', (req,res) => res.status(404).end());
   app.use(express.static(path.join(root,'dist'),{ dotfiles:'deny' }));
   app.get('/', (req,res) => res.sendFile(path.join(root,'dist/index.html')));
 }
