@@ -17,6 +17,15 @@ test('sources are restricted to safe URLs returned by the provider',()=>{
   const sources=collectSources({output:[{type:'web_search_call',action:{sources:[{url:'https://example.com/a',title:'A'},{url:'javascript:alert(1)'}]}},{type:'message',content:[{annotations:[{type:'url_citation',url:'https://example.com/a',title:'duplicate'},{type:'url_citation',url:'https://example.org/b',title:'B'}]}]}]});
   assert.equal(sources.length,2);assert.deepEqual(sources.map(s=>s.id),['S1','S2']);
 });
+test('tracking variants share one citation without merging distinct query results',()=>{
+  const urls=['https://example.com/page?id=1','https://example.com/page?id=1&utm_source=openai','https://example.com/page?id=2'];
+  const sources=collectSources({output:[{type:'web_search_call',action:{sources:urls.map(url=>({url}))}}]});
+  assert.deepEqual(sources.map(s=>s.url),[urls[0],urls[2]]);
+  assert.deepEqual(sources.map(s=>s.id),['S1','S2']);
+  const trackedFirst=collectSources({output:[{type:'message',content:[{annotations:urls.slice(0,2).reverse().map(url=>({type:'url_citation',url}))}]}]});
+  assert.equal(trackedFirst.length,1);assert.equal(trackedFirst[0].url,urls[1]);
+});
+
 test('rejects invented citations and missing evidence references',()=>{
   const forged=structuredClone(report);forged.claims[0].sourceIds=['S99'];assert.throws(()=>validateReport(forged,input,[]),/unknown source/);
   forged.claims[0].sourceIds=[];forged.claims[0].basis='retrieved evidence';assert.throws(()=>validateReport(forged,input,[]),/missing its citation/);

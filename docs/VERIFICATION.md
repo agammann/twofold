@@ -1,6 +1,38 @@
 # Verification evidence
 
-For the subsequent reliability updates and their measured checks, see [comparison reliability](RELIABILITY.md). The evidence below describes the original 1.0.0 release.
+## Public workflow review: September 19, 2026
+
+Tested the public site through the Codex in-app browser using synthetic visitor inputs and real OpenAI calls. Five completed comparisons covered arithmetic in both answer orders, a hard storage-capacity requirement, Python sorting with retrieved documentation, and missing observations. All five verdicts matched the expected result. See [reliability findings](RELIABILITY.md) for the two report-quality issues found and their targeted fixes.
+
+- Empty submission was blocked by required-field validation. Loading the example did not submit it.
+- Export downloaded a Markdown file containing the current question, original answers, and matching verdict.
+- Swapping cleared the previous result and correctly reversed the arithmetic winner after a new comparison.
+- Cancel restored the editable form and displayed the provider-processing notice.
+- At a 390 by 844 viewport, the form, report, and scrolling help dialog were usable without horizontal page overflow; Escape closed the dialog.
+- No browser console warnings or errors appeared during the completed comparison checks.
+- A fresh Windows checkout installed dependencies, passed its 25 pre-change tests, built, and started without a key on a separate local port. Status correctly reported unconfigured, and private file routes returned 404. Real-key setup was not repeated.
+- After the fixes, all 26 deterministic tests passed and the production build succeeded. The new live sealed-box regression passed in both orders, including empty reasoning arrays.
+
+These checks exercise real hosted services with synthetic scenarios. They are not recruited-user research, load testing, a cross-browser/device certification, or proof of general model accuracy. Public daily exhaustion was not forced; SQLite tests cover that boundary without spending all visitor capacity.
+
+## Public hosting release: 1.1.0
+
+The public [Twofold website](https://twofold.alx21.chatgpt.site) was deployed and verified on September 15, 2026 Pacific time (September 16 UTC). This is recorded release evidence, not a continuous availability monitor.
+
+| Check | Recorded result |
+| :--- | :--- |
+| Automated verification | All 25 deterministic tests passed. Windows and Ubuntu [CI jobs](https://github.com/agammann/twofold/actions/runs/35060527734) passed tests, builds, release checks, and the production dependency audit. |
+| Hosted provider connection | An anonymous public HTTP comparison completed with verdict A for the correct arithmetic answer. A second comparison through the browser form displayed the verdict, reasoning assessment, claim assessments, improved answer, and export control. |
+| Shared quota | Tests executed the actual SQL against SQLite, covering request spacing, daily exhaustion, reset, and failure reservation. Successful hosted comparisons exercised the deployed D1 path. Production quota exhaustion was not tested by spending the public allowance. |
+| Secret and route checks | The local gate passed across 51 tracked files and nine built files. Hosted probes for the environment file, Worker source, and hosting metadata returned 404. |
+| Browser preparation tool | The native WebMCP tool populated the visible form without submission and rejected invalid input without changing it. Ordinary browser use does not require WebMCP support. |
+| Publication | GitHub and Sites source revisions had the same reviewed tree. The README and GitHub Website field linked to the public app. |
+
+The public and local services share the evaluator. See [hosting](HOSTING.md), [privacy](PRIVACY.md), and [comparison reliability](RELIABILITY.md) for behavior, data handling, and measured limitations. Subsequent documentation edits do not constitute a new model evaluation or security audit. Consult the [verification workflow](https://github.com/agammann/twofold/actions/workflows/verify.yml) for checks tied to newer commits.
+
+## Original local release: 1.0.0
+
+Everything below describes the original local release. Its test counts, screenshots, and security scope are historical; they do not describe a fresh review of the hosted service.
 
 Verified September 15, 2026 (Pacific time; September 16 UTC). These checks establish the observed build and workflow, not universal evaluation accuracy or freedom from vulnerabilities.
 

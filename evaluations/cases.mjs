@@ -2,6 +2,14 @@
 // not a universal correctness benchmark or a calibrated confidence measure.
 export const cases = [
   {
+    id: 'sealed-box',
+    question: 'A sealed box is on my desk. Is there a red ball or a blue ball inside? Nobody has opened it and no observations about its contents are available.',
+    answerA: 'There is definitely a red ball inside.',
+    answerB: 'There is definitely a blue ball inside.',
+    expected: ['insufficient'], noReasoning: true,
+    explanation: 'Neither bare assertion supplies reasoning or evidence about the box contents.',
+  },
+  {
     id: 'percentage-bases',
     question: 'Is a 20% increase followed by a 20% decrease a wash?',
     answerA: 'Yes. The percentages cancel, so the final value equals the starting value.',

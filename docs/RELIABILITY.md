@@ -1,10 +1,20 @@
 # Comparison reliability
 
+## September 19, 2026: public workflow review
+
+Five completed comparisons through the public browser interface returned the expected verdicts: percentage arithmetic in both answer orders, a capacity-constrained plan choice, Python sorting with web research, and a sealed box with no observations. These were synthetic visitor scenarios using real OpenAI calls, not a study with recruited users.
+
+The sealed-box report correctly returned `insufficient`, but restated its bare assertions as reasoning steps. The generation instructions now explicitly exclude conclusion restatements from reasoning. A new `sealed-box` regression case requires both `insufficient` and empty reasoning arrays. After the change, both answer orders passed against live GPT 5.4 Mini (3,964 input and 1,348 output tokens total). This improves a measured failure; prompt instructions do not guarantee every future report will comply.
+
+The web report also listed one Python documentation page twice, with and without `utm_source`. Source collection now deduplicates UTM variants while retaining an actually retrieved link and preserving meaningful query parameters. A deterministic regression covers these boundaries. Different documentation versions, languages, and fragments remain separate; source count is not a count of independent confirmations.
+
+The current corpus contains twelve cases and runs 24 paid evaluations. Only the new case was rerun in both orders for this targeted change; the complete historical run below remains historical.
+
 ## Version 1.0.2: conditional recommendations
 
 A recommendation that depends on an unspecified deciding priority should receive `depends`, even when both individual conditional statements are true. If the priority is explicit, apply it. Two answers that correctly answer the question under the same supplied conditions can receive `both`, including two complete explanations of the same tradeoff. Missing factual observations and unsupported guesses about personal preferences still require `insufficient`. These rules guide model generation; they are not a mechanical guarantee of semantic correctness.
 
-Before this run, the courier case was changed to require `depends`, and three new cases were added: a fictional storage tradeoff, an explicit delivery deadline, and two equivalent capacity recommendations. The current corpus has eleven cases and makes 22 API requests, with nine distinct answer swaps and two identical answer repeats. The earlier rubric and results are preserved below.
+Before this run, the courier case was changed to require `depends`, and three new cases were added: a fictional storage tradeoff, an explicit delivery deadline, and two equivalent capacity recommendations. That corpus had eleven cases and made 22 API requests, with nine distinct answer swaps and two identical answer repeats. The earlier rubric and results are preserved below.
 
 The single measured version 1.0.2 run passed all 22 verdict and missing reasoning checks. All eleven pairs had matching mapped verdicts, so the live command exited successfully. The courier and storage tradeoffs returned `depends` in both orders; the explicit deadline preferred Y in both orders; the capacity recommendations returned `both`. GPT 5.4 Mini with medium reasoning used 42,482 input and 20,412 output tokens. See the appended [run summary](reliability-results.json). This is one development regression run, not a general accuracy estimate or proof of order independence.
 

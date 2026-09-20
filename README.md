@@ -1,18 +1,30 @@
 # Twofold
 
-**Two answers. A clearer picture.**
+**Compare two answers to the same question.** Examine the reasoning, check disputed claims, and see what the evidence supports.
 
-Twofold compares answers from two people or bots to the same question. Paste the question and both answers, then examine the reasoning, disputed claims, evidence, and a verdict that explains what holds up.
+**[Use Twofold online](https://twofold.alx21.chatgpt.site)** · [Local setup](docs/SETUP.md) · [Developer guide](docs/DEVELOPMENT.md)
 
-**[Open Twofold online](https://twofold.alx21.chatgpt.site)** to compare answers in your browser. No installation or API key is required for the public site. Public usage is limited to 30 shared comparisons per UTC day and one new comparison every 10 seconds. Failed or canceled requests can consume a slot.
+## Use the public website
 
-You can also run your own copy locally with your own OpenAI API key using the instructions below. The public site and local app use the same evaluator.
+Open [Twofold](https://twofold.alx21.chatgpt.site). No installation, account, or API key is required.
 
-![Twofold local application](docs/twofold-desktop.png)
+1. Enter the question both answers address.
+2. Paste **Answer A** and **Answer B**, including any explanations they give. Author names are optional.
+3. Optionally enable **Check web sources** to research factual claims.
+4. Select **Compare answers**. A comparison can take up to three minutes.
+5. Read the verdict, reasoning, claims, and improved answer. Select **Export report** to download a Markdown copy.
 
-## Run locally
+**Load example** fills the form with a percentage question. It does not submit a comparison until you select **Compare answers**.
 
-Install [Node.js 22.12 or newer](https://nodejs.org/en/download) and [Git](https://git-scm.com/downloads), then run:
+The public site shares **30 comparisons per day across all visitors**, resetting at midnight UTC. New comparisons must start at least 10 seconds apart. Failed or canceled requests can still use an allowance. If the shared limit is reached, return after the reset or run a local copy with your own key.
+
+![Twofold comparison interface from the original local release](docs/twofold-desktop.png)
+
+## Run your own copy
+
+You need [Node.js 22.12 or newer with npm](https://nodejs.org/en/download), [Git](https://git-scm.com/downloads), and an [OpenAI project API key](https://platform.openai.com/api-keys) with API access and available billing or credits. A ChatGPT subscription does not include API usage.
+
+Run these commands in a terminal:
 
 ```sh
 git clone https://github.com/agammann/twofold.git
@@ -23,112 +35,47 @@ npm run build
 npm start
 ```
 
-Open **http://127.0.0.1:3210** in your browser.
+Setup asks for your key in a hidden terminal prompt and saves it in the ignored `.env.local` file. Do not paste a key into the website, source code, or a GitHub issue.
 
-`npm run setup` asks for your own project API key in a hidden terminal prompt and writes `.env.local`, which Git ignores. Create a key in your [OpenAI API project](https://platform.openai.com/api-keys). API billing is separate from a ChatGPT subscription. Setup restricts the file to your user on macOS/Linux; on Windows it allows your user, SYSTEM, and Administrators and disables inherited access before writing the key.
+After the terminal says Twofold is ready, open `http://127.0.0.1:3210` on the same computer. Keep the terminal running; press **Ctrl+C** to stop it. This address is only for your local copy. Share the [public Sites URL](https://twofold.alx21.chatgpt.site) with other people.
 
-On Windows, you can also double click **start.cmd** after downloading or cloning the repository. On macOS/Linux, run **sh start.sh**. These launchers install dependencies when needed, run setup when the configuration file is missing, build, and start the local server.
+For later launches, run `npm start` from the project folder. The [local setup guide](docs/SETUP.md) also covers ZIP downloads, Windows and macOS/Linux launchers, configuration, updating, and troubleshooting. Local comparisons use your own OpenAI account and incur API charges.
 
-Use **Load example** for a percentage comparison. It fills in the inputs only. Press **Compare answers** to run a real evaluation; example results are never precomputed or presented as live output.
+## Understand the result
 
-## What the comparison includes
-
-* A verdict: A, B, both, neither, depends on assumptions, or insufficient evidence.
-* Each answer's stated reasoning, with exact excerpts from the supplied text.
-* Clearly marked inferred assumptions where reasoning was not explicitly supplied.
-* Strengths, weaknesses, agreements, and decisive differences.
-* Claim assessments that distinguish calculations, retrieved evidence, supplied text, and model judgments.
-* Optional web research with clickable sources tied to individual claims.
-* A complete improved answer and concrete limitations.
-* A Markdown export containing the original inputs and the comparison.
-
-Twofold cannot see a person or bot's private thought processes. It evaluates the explanation actually supplied. One evaluator's judgment can be wrong; qualitative confidence is not a calibrated probability, and a citation's existence does not prove it supports a claim. Critical decisions still require checking the evidence yourself.
-
-The evaluator can leave reasoning, differences, claims, and limitations empty when the supplied answers do not justify those sections. The interface and export explain what was not identified. Identical answer text cannot produce a preferred author or content differences; identical answers can still both be wrong. When valid recommendations favor different options and the deciding priority is missing, the verdict should be depends. An explicit priority resolves that tradeoff. Both applies when both answers correctly answer the question under the same supplied conditions.
-
-## Privacy and API key protection
-
-On the public site, the project key is a private Sites runtime secret. The site stores only a shared usage counter, UTC day, and last request time; it does not save comparison text or results. Hosting infrastructure may retain request metadata.
-
-For a local copy, the OpenAI key remains in the local Node server. It is never sent to the browser, included in a report, or intentionally logged. The frontend calls only its local server. The local app has no database, analytics, browser storage, or saved history; refreshing clears the current comparison.
-
-When you compare, the question and answer text go to OpenAI. Optional author names stay local and are omitted from provider requests. Web checking may send relevant queries through OpenAI's search tools to search providers. Requests use `store: false`; this does not override [OpenAI's data retention policies](https://developers.openai.com/api/docs/guides/your-data). Exported reports contain your supplied inputs, so share them deliberately.
-
-The server binds to `127.0.0.1`, validates browser origins and Host headers, and requires a per process request token. It is designed for a trusted personal computer. Other programs on that same computer can access localhost; this is not authentication between mutually untrusted local users. Do not expose the server through a tunnel or reverse proxy without adding appropriate authentication and deployment controls.
-
-Read [privacy and security details](docs/PRIVACY.md) and [verification evidence](docs/VERIFICATION.md).
-
-## Configuration
-
-Optional settings in your private `.env.local` file:
-
-```dotenv
-OPENAI_MODEL=gpt-5.4-mini
-PORT=3210
-```
-
-The default evaluation uses GPT 5.4 Mini with medium reasoning effort. An alternative model must support the Responses API, structured outputs, and medium reasoning effort; web checking also requires the web search tool. Model access depends on your OpenAI project. The provider endpoint is fixed to the official OpenAI API and cannot be changed through browser input.
-
-Limits: question up to 4,000 characters; each answer up to 12,000; two active comparisons; ten accepted requests per minute; three minutes per comparison; up to three web tool calls. A normal comparison uses one model request, or two when web checking is enabled. Token usage appears in the report. API charges and search charges depend on your [OpenAI pricing](https://developers.openai.com/api/docs/pricing); canceling cannot undo work already processed by the provider.
-
-## Development and checks
-
-```sh
-npm ci
-npm run dev
-npm test
-npm run build
-npm run check:release
-```
-
-Development serves the app at the same local address. Reload after frontend edits; the local Vite middleware intentionally disables HMR. Restart after server edits.
-
-`check:release` scans the exact staged Git blobs, working copies, and production bundle for key material without printing matches. Stage your intended release first. With the production server running, add HTTP exposure probes:
-
-```sh
-npm run check:release -- --http
-```
-
-Automated tests use controlled provider doubles and never spend API credits. Live smoke tests use your own key and incur API charges:
-
-```sh
-npm run test:live
-npm run test:live -- --web
-```
-
-For a broader reliability check with fixed synthetic inputs:
-
-```sh
-npm run eval:live
-npm run eval:live -- --case identical-wrong
-```
-
-The full suite makes 22 paid API requests across eleven cases, evaluating each in both answer orders with web research off. It checks expected verdicts, absent reasoning for bare conclusions, and verdict consistency after mapping reversed labels back. The two identical answer cases test repeat consistency. Generated reports stay in the ignored `evaluation-results/` directory. A successful suite is a small regression check, not proof of general accuracy or freedom from bias. See the [reliability evidence](docs/RELIABILITY.md) for the measured run and its limits.
-
-[GitHub Actions](https://github.com/agammann/twofold/actions/workflows/verify.yml) runs tests, build, release secret checks, and a production dependency audit on Windows and Ubuntu. No API credentials are required or supplied to CI.
-
-## Public hosting
-
-The public OpenAI Sites edition uses a Cloudflare Worker and a single D1 usage row. Runtime secrets stay outside source and build artifacts. An atomic database statement reserves capacity before each evaluation, so separate server instances share the same limit. See [hosted operation and checks](docs/HOSTING.md).
-
-## How it is built
-
-React and Vite provide the interface. Express serves the local app and mediates provider access. OpenAI Responses supplies optional research followed by a structured evaluation. Zod validates input and output; quote options are constrained to actual source excerpts, claim attribution is checked, and citation IDs must belong to the provider's retrieved source set. Source pages are not fetched by the local server.
-
-Author names are omitted to reduce reputation bias. The same evaluator still sees A and B in order; this does not establish order independence or eliminate model bias. Web research is an evidence gathering step, not a second independent judge.
-
-See [design references](docs/DESIGN.md) for the traffic ranked sites that informed the interface. Twofold is an independent project and is not affiliated with those sites or answer providers. The name also has unrelated existing uses; no uniqueness claim is made.
-
-## Troubleshooting
-
-| Message | Action |
+| Verdict | Meaning |
 | :--- | :--- |
-| OpenAI is not configured | Run `npm run setup`, then restart. |
-| API key rejected | Check the project key, replace it through setup, and restart. |
-| Rate or billing limit | Check API billing and project limits; wait before retrying. |
-| Model unavailable | Choose a compatible model available to your project. |
-| Comparison timed out | Shorten the answers or disable web checking. |
-| Port is in use | Set another `PORT` in `.env.local` and open that port. |
-| Quote or citation validation failed | Retry the evaluation. Invalid evidence is rejected rather than shown as verified. |
+| Answer A or B | One answer has a substantive supported advantage. |
+| Both | Both correctly answer the question under the same supplied conditions. |
+| Neither | Evidence establishes that both central answers are false. |
+| Depends | Choosing between valid recommendations requires a deciding condition or priority. |
+| Insufficient evidence | Missing evidence prevents determining which answer is true. |
 
-Public source is provided for the requested local workflow. No open source license has been selected for this repository.
+The report explains stated reasoning with exact excerpts, labels inferred assumptions, compares strengths and weaknesses, and provides claim assessments and a complete improved answer. Optional web research adds retrieved sources. Sections can be empty when there is nothing justified to report.
+
+Twofold evaluates the explanation supplied; it cannot access a person or bot's private thought process. Model judgments can be wrong. A matching quote, a citation, or high qualitative confidence does not prove correctness. See the [reliability results and known limitations](docs/RELIABILITY.md).
+
+## Privacy
+
+Your question and answers go to OpenAI when you compare. Optional author labels stay in your browser. Web research may send relevant queries to search providers. Exports contain your inputs and results.
+
+The project key stays private on the hosted server; a local copy uses your own server's key. Twofold does not save comparison text or results, and refreshing clears the current report. The public service stores only a shared usage counter and timing information. Hosting and OpenAI retention policies still apply. Read the [privacy and security details](docs/PRIVACY.md).
+
+## Documentation
+
+| Guide | What it covers |
+| :--- | :--- |
+| [Local setup](docs/SETUP.md) | Install, configure, start, update, and troubleshoot your own copy |
+| [Development](docs/DEVELOPMENT.md) | Project layout, commands, tests, and contribution checks |
+| [Public hosting](docs/HOSTING.md) | Sites architecture, shared limits, and deployment ownership |
+| [Privacy and security](docs/PRIVACY.md) | Data flow, key handling, and protection boundaries |
+| [Verification](docs/VERIFICATION.md) | Recorded checks, CI, and historical release evidence |
+| [Reliability](docs/RELIABILITY.md) | Live evaluation cases, measured results, and remaining limitations |
+| [Example report](docs/example-report.md) | A recorded Markdown export from a live comparison |
+| [Design references](docs/DESIGN.md) | Sources behind the interface design |
+
+[GitHub Actions](https://github.com/agammann/twofold/actions/workflows/verify.yml) runs tests, builds, release secret checks, and a production dependency audit on Windows and Ubuntu. Automated checks do not require an API key.
+
+## License
+
+No open source license has been selected for this repository. Contact the repository owner about licensing before redistributing the code.

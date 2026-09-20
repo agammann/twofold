@@ -14,11 +14,11 @@ The app stores no comparison database or local browser history. The hosted servi
 
 ## Credential handling
 
-The hosted Worker reads the key from a private Sites runtime secret. The local Node server reads it from `.env.local` or the process environment. The official API endpoint is fixed in server code. Configuration is never returned by the status endpoint beyond the configured boolean and model name. The other token in the status response is a random local request token, not your OpenAI key.
+The hosted Worker reads the key from a private Sites runtime secret. The local Node server reads it from `.env.local` or the process environment. The official API endpoint is fixed in server code. The status endpoint returns readiness, model, and a request marker; hosted status also identifies the hosted mode and daily limit. It never returns the OpenAI key. The local request token is random; the hosted marker is public and is not an authentication credential.
 
 Setup takes hidden terminal input, checks the destination is a regular file, establishes restrictive permissions before writing, and fails before the new secret write if permissions cannot be established. On Windows it replaces the file access rules with current user, SYSTEM, and Administrators. On POSIX it uses mode 0600. Administrators and software running as your account still have local authority; these controls do not protect an already compromised computer.
 
-The environment file is ignored by Git. The release check scans exact staged contents and working copies, plus built frontend files. It reports filenames only, never matching key values. This check is defense in depth, not a guarantee against all possible secret encodings or intentional disclosure. Do not paste a key into a question, answer, issue, screenshot, or report.
+The environment file is ignored by Git. The release check scans exact staged contents and working copies, plus all built files, including the hosted Worker. It reports filenames only, never matching key values. This check is defense in depth, not a guarantee against all possible secret encodings or intentional disclosure. Do not paste a key into a question, answer, issue, screenshot, or report.
 
 ## Local API controls
 
