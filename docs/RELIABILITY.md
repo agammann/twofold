@@ -1,3 +1,5 @@
+> Historical provider-edition evidence. These recorded results do not establish browser-model quality or current website behavior. See the README for the current browser workflow.
+
 # Comparison reliability
 
 ## September 19, 2026: public workflow review

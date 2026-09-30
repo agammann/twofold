@@ -5,9 +5,9 @@ import path from 'node:path';
 
 await viteBuild();
 // Embed only the explicit frontend output. No filesystem or secret access at runtime.
-const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml' };
+const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml' };
 const assets = {};
-for (const file of ['index.html', 'favicon.svg', ...readdirSync('dist/assets').map(f => `assets/${f}`)]) {
+for (const file of ['index.html', 'favicon.svg', 'browser-model-worker.mjs', ...readdirSync('dist/assets').map(f => `assets/${f}`)]) {
   const type = types[path.extname(file)]; if (!type) throw Error(`Unexpected frontend asset: ${file}`);
   assets[file === 'index.html' ? '/' : `/${file}`] = { type, data: readFileSync(`dist/${file}`).toString('base64') };
 }

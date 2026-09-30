@@ -1,3 +1,5 @@
+> Historical provider-edition evidence. These recorded results do not establish browser-model quality or current website behavior. See the README for the current browser workflow.
+
 # Twofold comparison
 
 Created: 2026-09-16T04:31:17.716Z
