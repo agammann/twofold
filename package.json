@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "express": "^5.1.0",
+    "linkedom": "^0.18.12",
     "openai": "^6.0.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
@@ -29,5 +30,10 @@
     "drizzle-orm": "^0.45.2",
     "esbuild": "^0.28.2",
     "vite": "^7.1.0"
+  },
+  "overrides": {
+    "@esbuild-kit/core-utils": {
+      "esbuild": "^0.25.12"
+    }
   }
 }

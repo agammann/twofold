@@ -1,11 +1,9 @@
 // Inference runs in a dedicated worker. Remote requests download executable
 // model assets; prompts are sent only to this origin's local worker.
 export const MODELS = [
-  { id: 'Qwen3-1.7B-q4f16_1-MLC', label: 'Standard · Qwen 3 1.7B' },
-  { id: 'Qwen3-4B-q4f16_1-MLC', label: 'Larger · Qwen 3 4B' },
-  { id: 'Llama-3.2-1B-Instruct-q4f16_1-MLC', label: 'Smaller · Llama 3.2 1B' },
+  { id: 'Qwen3-4B-q4f16_1-MLC', label: 'Qwen 3 4B · experimental' },
 ];
-let selected = MODELS[1].id;
+let selected = MODELS[0].id;
 let engine, worker, loading, loadController, active = false;
 let state = { phase: 'idle', text: 'Download a model once. Generation runs on your device.', progress: 0, model: selected };
 const listeners = new Set();
@@ -70,7 +68,7 @@ export async function loadModel({ signal } = {}) {
       return engine;
     })().catch(error => {
       worker?.terminate(); worker = engine = undefined;
-      publish({ phase: error.name === 'AbortError' ? 'idle' : 'error', progress: 0, text: error.name === 'AbortError' ? 'Download stopped. You can try again.' : error.message || 'The model could not load. Try the smaller model or another device.' });
+      publish({ phase: error.name === 'AbortError' ? 'idle' : 'error', progress: 0, text: error.name === 'AbortError' ? 'Download stopped. You can try again.' : error.message || 'The model could not load. Try another device or select hosted mode.' });
       throw error;
     }).finally(() => { loading = undefined; loadController = undefined; });
   }
@@ -92,7 +90,13 @@ export async function generate(messages, { schema, maxTokens = 1600, signal } = 
       stream: false,
       ...(schema ? { response_format: { type: 'json_object', schema: JSON.stringify(schema) } } : {}),
       extra_body: { enable_thinking: false },
-    }), generationSignal, () => local.interruptGenerate());
+    }), generationSignal, () => {
+      // Interrupting asynchronously can race with an immediate retry in the same
+      // worker. Discard that worker so its pending task cannot affect a new run.
+      worker?.terminate();
+      worker = engine = undefined;
+      publish({ phase: 'idle', progress: 0, text: 'Comparison stopped. Cached model files can be reused on the next run.' });
+    });
     aborted(signal);
     const choice = response.choices?.[0];
     if (!choice?.message?.content) throw Error('The model returned no result. Try a shorter input.');
