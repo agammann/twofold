@@ -13,14 +13,17 @@ function requireCompleted(response) {
   }
 }
 
-export async function evaluate(raw, { client, model, signal }) {
+export async function evaluate(raw, { client, model, signal, suppliedResearch }) {
   const input = Input.parse(raw);
   // Author labels stay local to avoid reputation bias and unnecessary disclosure.
   const content = { question: input.question, answerA: input.answerA, answerB: input.answerB };
-  let sources = [], research = '', searched = false;
+  const supplied = suppliedResearch !== undefined;
+  let sources = supplied ? suppliedResearch.map(({ id, url, title }) => ({ id, url, title })) : [];
+  let research = supplied ? suppliedResearch : '', searched = supplied && sources.length > 0;
+  const webRequested = supplied ? sources.length > 0 : input.web;
   const usage = { inputTokens: 0, outputTokens: 0 };
   const count = r => { usage.inputTokens += r.usage?.input_tokens || 0; usage.outputTokens += r.usage?.output_tokens || 0; };
-  if (input.web) {
+  if (input.web && !supplied) {
     const response = await client.responses.create({
       model, store: false, max_output_tokens: 3000, max_tool_calls: 3,
       tools: [{ type: 'web_search', search_context_size: 'medium' }],
@@ -37,11 +40,13 @@ export async function evaluate(raw, { client, model, signal }) {
     model, store: false, max_output_tokens: 6500,
     reasoning: { effort: 'medium' },
     instructions,
-    input: JSON.stringify({ ...content, today: new Date().toISOString().slice(0,10), webRequested: input.web, searched, sources, research }),
+    input: JSON.stringify({ ...content, today: new Date().toISOString().slice(0,10), webRequested, searched, sources, research,
+      ...(supplied ? { sourceMode: 'supplied-pages' } : {}) }),
     text: { format: zodTextFormat(reportSchemaFor(input), 'comparison') },
   }, { signal });
   requireCompleted(response); count(response);
   if (!response.output_parsed) throw new EvaluationError('The evaluator did not return a comparison. Please try again.');
   const report = validateReport(response.output_parsed, input, sources);
-  return { ...report, sources, meta: { model, createdAt: new Date().toISOString(), webRequested: input.web, searched, usage } };
+  return { ...report, sources, meta: { model, createdAt: new Date().toISOString(), webRequested, searched, usage,
+    ...(supplied ? { sourceMode: 'supplied-pages' } : {}) } };
 }

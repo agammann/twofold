@@ -19,6 +19,9 @@ export function markdownReport(input, report) {
   for (const c of report.claims) lines.push('',`### ${clean(c.claim)}`,`Answer: ${c.answer} | Assessment: ${c.assessment} | Basis: ${c.basis}`,`Quoted claim: ${clean(c.quote)}`,clean(c.explanation),`Sources: ${c.sourceIds.join(', ')||'None'}`);
   lines.push('','## A better answer',clean(report.betterAnswer),'','## Limitations',...(report.limitations.length ? report.limitations.map(l=>`* ${clean(l)}`) : [reportMessages.limitations]),'','## Retrieved sources');
   for (const s of report.sources) lines.push(`* ${s.id}: [${clean(s.title)}](${s.url.replace(/[\s()<>]/g,c=>encodeURIComponent(c))})`);
-  lines.push('',`Web requested: ${report.meta.webRequested}. Web search performed: ${report.meta.searched}.`,`Tokens: ${report.meta.usage.inputTokens} input, ${report.meta.usage.outputTokens} output.`,'','Twofold evaluates the reasoning shown. It cannot recover private thought processes. Its judgment can be wrong.');
+  const sourceActivity = report.meta.sourceMode === 'supplied-pages'
+    ? `Source import requested: ${report.meta.webRequested}. Supplied pages retrieved: ${report.sources.length}.`
+    : `Web requested: ${report.meta.webRequested}. Web search performed: ${report.meta.searched}.`;
+  lines.push('',sourceActivity,`Tokens: ${report.meta.usage.inputTokens} input, ${report.meta.usage.outputTokens} output.`,'','Twofold evaluates the reasoning shown. It cannot recover private thought processes. Its judgment can be wrong.');
   return lines.join('\n');
 }

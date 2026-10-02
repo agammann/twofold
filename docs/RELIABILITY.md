@@ -1,6 +1,24 @@
-> Historical provider-edition evidence. These recorded results do not establish browser-model quality or current website behavior. See the README for the current browser workflow.
+> Development verification and historical provider-edition evidence. These recorded results cover the versions and workflows named below; they do not establish general accuracy. See the README for the current device and visitor-key workflows.
 
 # Comparison reliability
+
+## October 2, 2026: visitor-key workflow
+
+The visitor-key route was exercised with real OpenAI Responses requests from the local production server. Twelve fixed synthetic cases were run in both answer orders, plus a retrieved-page case using example.com. The checks cover the expected verdict, missing reasoning on bare assertions, exact quotation validation, and source classification; they do not establish that every generated sentence is correct.
+
+| Model, medium reasoning | Passed checks | Observed failures |
+| --- | --- | --- |
+| GPT-5.4 | 25 / 25 | None in this run |
+| GPT-5.4 mini | 23 / 25 | One sealed-box response labeled unknown evidence as neither; the sourced case attributed reasoning to bare assertions. |
+
+GPT-5.4 is the hosted default. Mini remains an explicit lower-cost alternative. These are single development runs on visible cases, not a held-out benchmark, an accuracy percentage, or a promise of order independence. Model aliases and outputs can change. The source-label instructions were tightened after an earlier report mislabeled retrieved evidence as supplied text.
+
+Actual Chrome comparisons produced reports and Markdown downloads. Edge verification additionally covered native WebMCP preparation without submission, invalid-key rejection by OpenAI, cancellation with preserved inputs, immediate successful retry, export, key clearing on mode changes and reload, and layouts at 1440, 390, and 320 pixels. One longer Chrome run timed out while taking a screenshot after its comparisons and exports had succeeded; that screenshot failure is not counted as a passing visual check.
+
+The Qwen 3 4B device run completed a real comparison and export on WebGPU, but invented an agreement between answers with opposing conclusions. It remains explicitly experimental. The smaller device models were removed from the supported choices after basic comparison runs failed report validation. Exact-quote checks do not establish semantic correctness. Hosted and device reports both require review.
+
+The sections below preserve historical measurements from the earlier provider edition.
+
 
 ## September 19, 2026: public workflow review
 
@@ -48,7 +66,7 @@ Verdict meanings are explicit:
 
 ## Reproducible checks
 
-Run `npm test` for deterministic checks without API charges. The current `npm run eval:live` runs eleven fixed synthetic cases in [the corpus](../evaluations/cases.mjs), in original and reversed order, for 22 paid requests with web research off. It saves complete reports to the ignored `evaluation-results/latest.json` file. Run one pair with `npm run eval:live -- --case identical-wrong`. The historical version 1.0.1 run below used eight cases and 16 requests.
+Run `npm test` for deterministic checks without API charges. The current `npm run eval:live` runs twelve fixed synthetic cases in [the corpus](../evaluations/cases.mjs), in original and reversed order, for 24 paid requests with web research off. It saves complete reports to the ignored `evaluation-results/latest.json` file. Run one pair with `npm run eval:live -- --case identical-wrong`. The historical version 1.0.1 run below used eight cases and 16 requests.
 
 The scorer checks verdicts against a declared rubric and checks for invented reasoning on bare conclusions. It maps reversed A/B verdicts back to their original labels before comparing consistency. In version 1.0.1, the two identical answer cases were repeat checks; the other six pairs swapped distinct answer texts. The conditional courier case allowed both `depends` and `both`, since both recommendations explicitly state their conditions. The expected rubric was established before the measured runs.
 

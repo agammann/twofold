@@ -1,39 +1,63 @@
 # Twofold
 
-Compare two answers to the same question. Examine stated reasoning, check disputed claims, and see what the evidence supports.
+Compare two answers to the same question. Examine the argument each answer actually makes, check disputed claims, and review an explained verdict with exact quotations.
 
 [Use Twofold](https://twofold.alx21.chatgpt.site)
 
-## Use the browser edition
+## Try a comparison
 
-1. Enter the question and both answers. Author labels are optional and excluded from evaluation.
-2. Optionally add up to three public HTTPS source-page URLs.
-3. Select **Compare answers**, then review the verdict, exact quotes, claims, reasoning and complete improved answer.
-4. Export a Markdown report if desired. Refresh clears the current comparison.
+1. Start with **OpenAI with your key**, or choose the experimental **On this device** option.
+2. Enter the question and both answers, or select **Load example**. Optional author labels stay local and are excluded from evaluation.
+3. Optionally add up to three public HTTPS source-page URLs, one per line.
+4. Compare, then inspect the verdict, reasoning, claims, source citations, and complete improved answer.
+5. Export a Markdown report to keep the inputs and result. Refresh clears the form and current report.
 
-No API key, paid AI API or shared daily AI allowance is used. The model runs on the visitor's graphics device.
+## Choose a model
 
-The first run downloads model files from public hosts. Text generation runs in a dedicated browser worker using WebLLM; prompts are not sent to a hosted model. This workflow defaults to Qwen 3 4B. Smaller Qwen 3 1.7B and Llama 3.2 1B choices use less memory but can produce substantially weaker drafts. Model downloads are cached when browser storage permits.
+| Mode | What you need | Cost and data |
+| --- | --- | --- |
+| On this device | HTTPS or localhost, WebGPU, compatible graphics hardware, and space for a large first download | No API charge. Model files download from public hosts; prompts and generation stay on the device. |
+| OpenAI with your key | Your own OpenAI Platform API key with model access and API billing | Usage is charged to your API account. This server forwards your question, answers, and supplied source text to OpenAI. No browser model download is needed. |
 
-Use HTTPS (or localhost) and a current browser with WebGPU and compatible graphics hardware. A model choice does not guarantee that every device has enough memory. Download speed, inference speed and answer quality depend on the device and model. Stop a download or generation from the interface; errors preserve existing inputs. There is no paid model fallback. Hosting and model-download bandwidth remain separate from AI API fees.
+Device mode uses Qwen 3 4B as an experimental alternative. Browser models can omit claims, misinterpret reasoning, and produce inconsistent explanations even with a correct verdict. Treat reports as drafts to check, before relying on a conclusion. A larger model choice does not guarantee enough device memory or a correct result.
 
-## What changed
+Hosted mode defaults to GPT-5.4. In one development run it passed all 25 fixed checks, while GPT-5.4 mini passed 23; mini remains an optional lower-cost choice with weaker evaluation. These checks cover verdicts, absent reasoning, and source labeling on a small synthetic suite, not general accuracy. Both models still require review. See [current API pricing](https://openai.com/api/pricing/). This mode uses API Platform billing, separate from ChatGPT subscription usage.
 
-The report structure and exact-quote validation remain. Model judgment can differ from the earlier hosted model and must be reviewed. Verdicts remain A, B, both, neither, depends or insufficient. Identical answers cannot prefer one author or claim content differences.
+The app never falls back to a paid model automatically. Hosted comparisons require the visitor to supply a key and submit the comparison. No operator key or shared inference allowance is used. Cancel preserves the inputs and requests cancellation; usage already incurred may still be billed.
 
-Paid web search has been replaced with retrieval of pages the visitor supplies. This edition does not automatically discover sources. Only actually retrieved URLs and known source IDs may appear as citations. A page's inclusion does not establish reliability or support for a claim. Imports are bounded; long or blocked pages fail visibly instead of being silently truncated.
+## Understand the evidence
 
-## Privacy
+Verdicts can favor A or B, find both correct or neither correct, depend on an unspecified condition, or find evidence insufficient. Identical answers cannot prefer one author or invent content differences.
 
-Questions, answers and generation stay in this tab. Public hosts provide model files. Optional source import sends only the chosen URL to the app server, which fetches that page. Hosting and source sites may retain request metadata. Reports contain the supplied answers. There is no saved comparison history or paid provider request. `/api/compare` is retired and returns 410.
+Stated reasoning and claim quotations must match the attributed original answer. Inferred assumptions carry no fabricated quote. These checks establish correspondence to text, not truth or completeness. Confidence is the model's qualitative judgment, not a measured probability.
+
+This edition retrieves pages you supply; it does not search for sources. Imports allow public HTTPS text pages with bounded size and redirects. Long, unreadable, or blocked pages fail visibly. Only retrieved URLs and known source IDs can appear as citations. Retrieval alone does not establish that a page is reliable or supports a claim.
+
+## Privacy and credentials
+
+The app has no saved comparison history. Author labels remain in the tab. Exports include the supplied question and answers.
+
+- **Device mode:** model downloads use public hosts. Optional source import sends the chosen URL to this server, which fetches the page. Answers are not sent to an inference provider.
+- **Hosted mode:** the key remains in tab memory and accompanies the comparison request to this server. It is forwarded only to the fixed OpenAI API endpoint, never to source websites. The app does not persist or log keys or comparisons. **Clear key**, refresh, or switching to device mode removes the key from app state. Keys are excluded from exports and browser storage.
+- Hosted requests use `store: false`. This is not a promise of zero provider retention; [OpenAI's data policies](https://developers.openai.com/api/docs/guides/your-data) apply. Hosting and source sites may retain request metadata.
+
+Only enter a key into an instance you trust. A short-lived, restricted verification key is preferable to a broadly privileged key. Never commit credentials to the repository or embed an operator key in a public frontend.
 
 ## Run locally
 
-Node.js 22.12+ and npm are required. Run `npm ci`, `npm run build`, then `npm start`; open `http://127.0.0.1:3210`. For development use `npm run dev`. No AI secret or setup prompt is required.
+Use Node.js 22.12+ and npm:
 
-Run `npm test` and `npm run build`. Hosted tests verify that retired inference cannot call a provider, asset responses permit the required browser model hosts, and files outside the explicit frontend allowlist are unavailable. Historical provider reliability results are preserved in [docs/RELIABILITY.md](docs/RELIABILITY.md); they are not browser-model benchmarks.
+```sh
+npm ci
+npm run build
+npm start
+```
 
-The public Worker serves explicitly embedded frontend assets and bounded public source imports. Existing D1 migrations are retained for deployment compatibility; no AI usage counter is used. SDK code and model assets load only when requested.
+Open `http://127.0.0.1:3210` or `http://localhost:3210` on the same computer. For development, run `npm run dev`. No server-side API key is required: device mode needs none, and hosted mode uses the visitor's key supplied in the UI. Environment keys are not an inference fallback.
+
+Run `npm test`, `npm run build`, and `npm run check:release` before publishing. Tests cover input bounds, exact quotations, source IDs, credential separation, provider-error redaction, source imports, cancellation, and the retired operator route. Controlled transport tests are not model-accuracy benchmarks. Historical hosted evaluation results are recorded in [docs/RELIABILITY.md](docs/RELIABILITY.md).
+
+The public Worker serves an explicit frontend asset allowlist, bounded source imports, and `/api/compare/visitor`. The earlier `/api/compare` operator route remains retired with HTTP 410. Existing D1 migrations remain for deployment compatibility; no model quota database is used.
 
 ## License
 

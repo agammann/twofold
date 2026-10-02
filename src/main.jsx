@@ -4,6 +4,8 @@ import { flushSync } from 'react-dom';
 import { verdictLabels, reportMessages } from '../shared/labels.mjs';
 import { markdownReport } from '../shared/export.mjs';
 import { compareInBrowser } from './lib/compare.mjs';
+import { compareWithVisitorKey } from './lib/hosted-compare.mjs';
+import { stopDownload } from './lib/browser-model.mjs';
 import BrowserModelPanel from './components/browser-model-panel.jsx';
 import './style.css';
 import './theme.css';
@@ -49,7 +51,8 @@ function Results({ result, input, resultRef }) {
   function download() {
     const blob = new Blob([markdownReport(input,result)],{type:'text/markdown;charset=utf-8'});
     const url=URL.createObjectURL(blob), a=document.createElement('a');
-    a.href=url; a.download=`twofold-${result.meta.createdAt.slice(0,10)}.md`; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1000);
+    a.href=url; a.download=`twofold-${result.meta.createdAt.slice(0,10)}.md`; a.hidden=true;
+    document.body.append(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),60000);
   }
   const sources=new Map(result.sources.map(s=>[s.id,s]));
   return <section className="results" ref={resultRef} tabIndex={-1} aria-label="Comparison results">
@@ -74,9 +77,10 @@ function Results({ result, input, resultRef }) {
 }
 
 function App() {
-  const [data,setData]=useState(empty), [status,setStatus]=useState({configured:true,hosted:true}), [error,setError]=useState('');
+  const [data,setData]=useState(empty), [error,setError]=useState('');
   const [busy,setBusy]=useState(false), [result,setResult]=useState(null), [resultInput,setResultInput]=useState(null), [elapsed,setElapsed]=useState(0);
   const [notice,setNotice]=useState(''), [sourceUrls,setSourceUrls]=useState('');
+  const [mode,setMode]=useState('hosted'), [apiKey,setApiKey]=useState(''), [hostedModel,setHostedModel]=useState('gpt-5.4');
   const controller=useRef(null), resultRef=useRef(null), howRef=useRef(null);
   useEffect(()=>{
     const context=document.modelContext; if(!context?.registerTool)return;
@@ -86,7 +90,7 @@ function App() {
       annotations:{readOnlyHint:false,untrustedContentHint:true},execute(value){
         if(controller.current)throw Error('Wait until the current comparison finishes.');
         if(!value||Object.keys(value).some(k=>!['question','answerA','answerB'].includes(k))||['question','answerA','answerB'].some(k=>typeof value[k]!=='string'||value[k].trim().length<(k==='question'?3:1)||value[k].length>(k==='question'?4000:12000)))throw Error('Provide a question and two answers within the form limits.');
-        flushSync(()=>{setData({...empty,...value});setResult(null);setError('');setNotice('Answers prepared. Review them before comparing.');});
+        flushSync(()=>{setData({...empty,...value});setSourceUrls('');setResult(null);setError('');setNotice('Answers prepared. Review them before comparing.');});
         return {prepared:true,submitted:false};
       }};
     try{Promise.resolve(context.registerTool(tool,{signal:lifecycle.signal})).catch(()=>{});}catch{}
@@ -100,27 +104,41 @@ function App() {
     setBusy(true);setElapsed(0);setError('');setNotice('');setResult(null);
     const snapshot={...data}; controller.current=new AbortController();
     try {
-      const body=await compareInBrowser(snapshot,sourceUrls,controller.current.signal);
+      const body=mode==='hosted'
+        ? await compareWithVisitorKey(snapshot,sourceUrls,apiKey,hostedModel,controller.current.signal)
+        : await compareInBrowser(snapshot,sourceUrls,controller.current.signal);
       setResult(body);setResultInput(snapshot);
       requestAnimationFrame(()=>{resultRef.current?.focus({preventScroll:true});resultRef.current?.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'start'});});
-    } catch(err) {if(err.name==='AbortError')setNotice('Comparison canceled. Your answers are still in the form.');else setError(err.message);}
+    } catch(err) {if(err.name==='AbortError')setNotice('Comparison canceled. Your answers are still in the form.');else setError(err.name==='ZodError'?'Enter a question with at least three non-space characters and two non-empty answers within the form limits.':err.message);}
     finally{setBusy(false);controller.current=null;}
   }
   return <><header className="topbar"><div className="nav-inner"><a className="brand" href="/" aria-label="Twofold home"><Icon type="logo"/>twofold</a><nav aria-label="Main navigation"><a href="#compare" className="active">Compare</a><button onClick={()=>howRef.current.showModal()}>How it works</button><a href="https://github.com/agammann/twofold" target="_blank" rel="noopener noreferrer">GitHub<Icon type="arrow" width="15" height="15"/></a></nav></div></header>
     <main id="compare"><div className="intro"><h1>Two answers. A clearer picture.</h1><p>Compare the reasoning. Check the claims. See what holds up.</p></div>
-    <BrowserModelPanel/>
+    <section className="inference-choice" aria-label="Comparison mode">
+      <fieldset disabled={busy}><legend>Choose how to compare</legend><div className="mode-options">
+        <label><input type="radio" name="inference-mode" value="browser" checked={mode==='browser'} onChange={()=>{setMode('browser');setApiKey('');setError('');setNotice('Browser mode selected. The API key was cleared.');}}/>On this device <span>Experimental · no API charge · WebGPU</span></label>
+        <label><input type="radio" name="inference-mode" value="hosted" checked={mode==='hosted'} onChange={()=>{stopDownload();setMode('hosted');setError('');setNotice('Hosted mode selected. Comparisons use your OpenAI API account.');}}/>OpenAI with your key <span>Paid API usage · no model download</span></label>
+      </div></fieldset>
+      {mode==='hosted' && <div className="hosted-settings">
+        <div><label htmlFor="hosted-model">Hosted model</label><select id="hosted-model" value={hostedModel} disabled={busy} onChange={e=>setHostedModel(e.target.value)}><option value="gpt-5.4">GPT-5.4 · recommended</option><option value="gpt-5.4-mini">GPT-5.4 mini · lower cost, weaker evaluation</option></select></div>
+        <div><label htmlFor="api-key">Your OpenAI API key</label><input id="api-key" type="password" autoComplete="off" spellCheck={false} value={apiKey} maxLength={512} disabled={busy} onChange={e=>setApiKey(e.target.value)} aria-describedby="hosted-privacy" placeholder="Paste your API key"/></div>
+        <button className="quiet" type="button" disabled={busy||!apiKey} onClick={()=>{setApiKey('');setNotice('API key cleared.');}}>Clear key</button>
+        <p id="hosted-privacy">Your question, answers, and supplied source text go through this server to OpenAI. Your key is held in this tab and sent only with a comparison; it is not saved by this app. Refresh, Clear key, or switch to device mode to remove it. Usage is billed to your OpenAI API account. GPT-5.4 costs more than mini and performed better in our small regression suite. <a href="https://openai.com/api/pricing/" target="_blank" rel="noopener noreferrer">Check current prices</a>.</p>
+      </div>}
+    </section>
+    {mode==='browser' && <><BrowserModelPanel/><p className="model-caution">Browser models are experimental evaluators. They can miss claims or give inconsistent explanations, even when the verdict is correct. Check the report against the original answers.</p></>}
     <form onSubmit={compare}><label className="question-label" htmlFor="question">The question</label><textarea className="question" id="question" value={data.question} required minLength={3} maxLength={4000} rows={1} onChange={e=>update('question',e.target.value)} placeholder="What question were both answers responding to?" disabled={busy}/>
       <div className="answer-grid"><AnswerEditor id="A" data={data} update={update} disabled={busy}/><AnswerEditor id="B" data={data} update={update} disabled={busy}/></div>
-      <div className="form-actions"><div className="secondary-actions"><button className="quiet" type="button" disabled={busy} onClick={()=>{setData(d=>({...d,answerA:d.answerB,answerB:d.answerA,nameA:d.nameB,nameB:d.nameA}));setResult(null);setNotice('Answers swapped.');setError('');}}><Icon type="swap"/>Swap answers</button><button className="quiet" type="button" disabled={busy} onClick={()=>{setData({...example});setResult(null);setError('');setNotice('Example loaded. Compare to get a live evaluation.');}}><Icon type="file"/>Load example</button></div>
-      <div className="primary-actions"><button className="primary" type="submit" disabled={busy||!status?.configured}>{busy?'Comparing…':'Compare answers'}{busy?<span className="spinner"/>:<Icon type="arrow"/>}</button></div></div>
-      <label htmlFor="source-urls">Source URLs <span>(optional, up to three public pages)</span></label><textarea id="source-urls" rows={2} value={sourceUrls} onChange={e=>setSourceUrls(e.target.value)} disabled={busy} placeholder="https://…"/>
-      <p className="privacy">Comparison runs on your device. Model files download from public hosts. Source URLs, when supplied, are fetched through this site; answers are not sent to a model service. This version checks the pages you supply rather than searching the web.</p>
+      <div className="source-input"><label htmlFor="source-urls">Source URLs <span>(optional, up to three public pages)</span></label><textarea id="source-urls" rows={2} value={sourceUrls} onChange={e=>{setSourceUrls(e.target.value);setResult(null);setError('');setNotice('');}} disabled={busy} aria-describedby="source-hint" placeholder="https://…"/><p id="source-hint">One public HTTPS URL per line. Leave blank to compare without web evidence.</p></div>
+      <div className="form-actions"><div className="secondary-actions"><button className="quiet" type="button" disabled={busy} onClick={()=>{setData(d=>({...d,answerA:d.answerB,answerB:d.answerA,nameA:d.nameB,nameB:d.nameA}));setResult(null);setNotice('Answers swapped.');setError('');}}><Icon type="swap"/>Swap answers</button><button className="quiet" type="button" disabled={busy} onClick={()=>{setData({...example});setSourceUrls('');setResult(null);setError('');setNotice('Example loaded. Compare to get a live evaluation.');}}><Icon type="file"/>Load example</button></div>
+      <div className="primary-actions"><button className="primary" type="submit" disabled={busy}>{busy?'Comparing…':mode==='hosted'?'Compare with OpenAI':'Compare answers'}{busy?<span className="spinner"/>:<Icon type="arrow"/>}</button></div></div>
+      <p className="privacy">{mode==='browser'?'Comparison runs on your device. Model files download from public hosts. Answers are not sent to a model service.':'Hosted comparison uses your API account. OpenAI receives the question, answers, and supplied source text; author labels stay in this tab. Provider data policies apply.'} Source URLs, when supplied, are fetched through this site. This version checks the pages you supply rather than searching the web.</p>
     </form>
-    {busy && <div className="progress" role="status" aria-live="polite"><div><strong>{sourceUrls.trim()?'Reading supplied sources and comparing…':'Examining the arguments and claims…'}</strong><p>{elapsed}s elapsed. The first model download and generation can take several minutes.</p></div><button className="quiet" onClick={()=>controller.current?.abort()}>Cancel</button></div>}
+    {busy && <div className="progress" role="status" aria-live="polite"><div><strong>{sourceUrls.trim()?'Reading supplied sources and comparing…':'Examining the arguments and claims…'}</strong><p>{elapsed}s elapsed. {mode==='hosted'?'Waiting for OpenAI. Cancel stops waiting and requests cancellation; usage already incurred may still be billed.':'The first model download and generation can take several minutes.'}</p></div><button className="quiet" onClick={()=>controller.current?.abort()}>Cancel</button></div>}
     {error && <div className="error" role="alert">{error}</div>}{notice && <p className="notice" role="status">{notice}</p>}
     {result ? <Results result={result} input={resultInput} resultRef={resultRef}/> : !busy && <section className="empty-result"><div className="empty-symbol"><Icon type="logo" width="32" height="32"/></div><h2>Make room for a second look.</h2><p>Add the same question and two answers from any person or bot.<br/>Your comparison will appear here, with the reasoning and evidence behind it.</p></section>}
-    <footer>An evaluation of the reasoning shown, not access to private thought processes.<span>Browser inference · No saved comparisons · No paid AI API</span></footer></main>
-    <dialog ref={howRef} aria-labelledby="how-title"><div className="dialog-header"><h2 id="how-title">How Twofold works</h2><button className="quiet" aria-label="Close explanation" onClick={()=>howRef.current.close()}><Icon type="close"/></button></div><ol className="how-steps"><li><strong>One question, two perspectives.</strong><p>Paste both answers, including their explanations. Names are optional, stay local, and are not used for evaluation.</p></li><li><strong>Examine the argument.</strong><p>A browser model compares conclusions, assumptions, reasoning, and claims. Quoted steps must match the original text. Inferences are labeled.</p></li><li><strong>Follow the evidence.</strong><p>Optional source URLs retrieve public pages before evaluation. Only retrieved source URLs can appear as citations. A retrieved source is not automatically reliable.</p></li><li><strong>A verdict with room for nuance.</strong><p>Either answer, both, neither, conditional, or insufficient evidence. Confidence is qualitative. Evaluations can be wrong, and one model’s judgment is not proof.</p></li></ol><div className="dialog-note"><strong>Your data</strong><p>Your answers and results stay in this tab. Exported reports include your inputs. Model downloads use public hosts, while prompts and generation run on your device. Optional source imports send the chosen URLs to this site's server. Hosting may retain request metadata. Browser models can make mistakes; check the quoted answers and sources before relying on a verdict.</p></div></dialog>
+    <footer>An evaluation of the reasoning shown, not access to private thought processes.<span>Device inference or your OpenAI key · No saved comparisons</span></footer></main>
+    <dialog ref={howRef} aria-labelledby="how-title"><div className="dialog-header"><h2 id="how-title">How Twofold works</h2><button className="quiet" aria-label="Close explanation" onClick={()=>howRef.current.close()}><Icon type="close"/></button></div><ol className="how-steps"><li><strong>One question, two perspectives.</strong><p>Paste both answers, including their explanations. Names are optional, stay local, and are not used for evaluation.</p></li><li><strong>Examine the argument.</strong><p>Your selected browser or hosted model compares conclusions, assumptions, reasoning, and claims. Quoted steps must match the original text. Inferences are labeled.</p></li><li><strong>Follow the evidence.</strong><p>Optional source URLs retrieve public pages before evaluation. Only retrieved source URLs can appear as citations. A retrieved source is not automatically reliable.</p></li><li><strong>A verdict with room for nuance.</strong><p>Either answer, both, neither, conditional, or insufficient evidence. Confidence is qualitative. Evaluations can be wrong, and one model’s judgment is not proof.</p></li></ol><div className="dialog-note"><strong>Your data</strong><p>In device mode, your answers and generation stay in this tab; model files download from public hosts. In hosted mode, your question, answers, and source text pass through this server to OpenAI using your API key. The app does not save the key or comparisons, and requests disable provider response storage; OpenAI data policies still apply. Author labels stay local. Optional source imports send the chosen URLs to this server. Hosting may retain request metadata. Exported reports include your inputs. Every model can make mistakes; check quotations, claims, and sources before relying on a verdict.</p></div></dialog>
   </>;
 }
 
