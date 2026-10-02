@@ -51,7 +51,7 @@ test('visitor comparison uses only the supplied key at the fixed API endpoint wi
   const handler = createHostedHandler({}, { fetchImpl: async (url, options) => {
     calls++;
     assert.equal(url, 'https://api.openai.com/v1/responses');
-    assert.equal(options.redirect, 'error');
+    assert.equal(options.redirect, 'manual');
     assert.equal(options.headers.Authorization, `Bearer ${key}`);
     assert.deepEqual(Object.keys(options.headers).sort(), ['Authorization', 'Content-Type']);
     assert.equal(options.body.includes(key), false);
@@ -158,6 +158,20 @@ test('upstream errors are sanitized and never automatically retried', async () =
   const response = await handler.fetch(request(), env);
   assert.equal(response.status, 502);
   assert.equal((await response.text()).includes(key), false);
+});
+
+test('provider redirects are rejected without sending credentials to the redirect destination', async () => {
+  const calls = [];
+  const handler = createHostedHandler({}, { fetchImpl: async (url, options) => {
+    calls.push(url);
+    assert.equal(url, 'https://api.openai.com/v1/responses');
+    assert.equal(options.redirect, 'manual');
+    return new Response(null, { status: 302, headers: { Location: 'https://redirect-target.example/' } });
+  } });
+  const response = await handler.fetch(request(), env);
+  assert.equal(response.status, 502);
+  assert.equal((await response.text()).includes(key), false);
+  assert.deepEqual(calls, ['https://api.openai.com/v1/responses']);
 });
 
 test('visitor reports retain exact quotation and citation validation', async () => {

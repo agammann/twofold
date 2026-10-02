@@ -27,7 +27,7 @@ function providerFailure(status) {
 function visitorClient(apiKey, fetchImpl) {
   return { responses: { async parse(parameters, { signal }) {
     const response = await fetchImpl('https://api.openai.com/v1/responses', {
-      method: 'POST', redirect: 'error', signal,
+      method: 'POST', redirect: 'manual', signal,
       headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...parameters, store: false }),
     });
