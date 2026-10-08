@@ -11,3 +11,5 @@ playwright-report/
 evaluation-results/
 .sites-runtime/
 .wrangler/
+
+/release-artifacts/

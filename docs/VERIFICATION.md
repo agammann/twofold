@@ -1,6 +1,14 @@
-> Historical provider-edition evidence. These recorded results do not establish browser-model quality or current website behavior. See the README for the current browser workflow.
-
 # Verification evidence
+
+## October 7, 2026: source release 1.1.1
+
+The current visitor-key browser workflow was checked in Chrome 155.0.8059.12 against the local production server. Three first GPT-5.4 responses covered successive percentage changes, missing observations in a sealed box, and an actual retrieved Example Domain page. A first GPT-5.4 mini response covered the same missing-observation case. Inputs and factual criteria were fixed before inference; each verdict and the required reasoning/source distinctions matched them. Actual Markdown exports matched the displayed reports. This is a small development check, not general model accuracy or verification of the public deployment.
+
+Controlled browser checks cover initial GPT-5.4 mode without a key or automatic request, explicit submission, author-label exclusion, export, swapping, visible provider errors, cancellation, credential clearing and reload, and desktop/390/320-pixel layouts. The genuine native `prepare_comparison` call populated the visible form without inference. Controlled responses establish interface behavior, separately from real model quality.
+
+The Qwen 3 4B device workflow downloaded, cancelled, recovered from cached files, completed one comparison and exported it on an AMD RDNA 3 WebGPU adapter. Download and generation cancellation preserved the inputs without a hosted request. Its arithmetic verdict was correct, but it gave vague praise to the incorrect answer's explanation. The full first result was retained and device evaluation remains experimental.
+
+The sections below retain measurements of their named historical editions. Their shared-quota and server-key setup descriptions do not apply to the current visitor-key workflow.
 
 ## Public workflow review: September 19, 2026
 
