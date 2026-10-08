@@ -1,6 +1,6 @@
 # Setup
 
-Install Node.js 22.12+ and npm. Run `npm ci`, `npm run build`, and `npm start`. Open `http://127.0.0.1:3210` or `http://localhost:3210` on the same computer. Use `npm run dev` for development.
+Install Node.js 24 and npm. Extract the checked source release into a new folder, then run `npm ci`, `npm run build`, and `npm start`. Open `http://127.0.0.1:3210` or `http://localhost:3210` on the same computer. Use `npm run dev` for development. Windows `start.cmd` performs the same installation/build/start workflow without requesting an operator key. See [support and recovery](STABILITY.md) before upgrading or discarding an extraction.
 
 ## Device mode
 

@@ -1,6 +1,12 @@
-> Development verification and historical provider-edition evidence. These recorded results cover the versions and workflows named below; they do not establish general accuracy. See the README for the current device and visitor-key workflows.
-
 # Comparison reliability
+
+## October 7, 2026: first responses for 1.1.1
+
+Four browser comparisons used factual criteria frozen before inference. GPT-5.4 correctly identified the 4% loss after a 20% increase and decrease, preserved unknown contents as `insufficient` with no invented reasoning, and cited the actual retrieved Example Domain page for its documentation purpose. GPT-5.4 mini also returned `insufficient` with empty reasoning for the sealed box. All four actual exports were read back. No response was replaced by a quality retry.
+
+These visible cases check calculation, absent reasoning and source attribution. They do not replace the larger historical run, erase its adverse results, or establish broad accuracy. Review the original answers and every claim before relying on a generated report.
+
+A first Qwen 3 4B device comparison returned B, the correct 96/4% calculation, exact attributed quotations and no invented agreement. It nevertheless described the incorrect A explanation as a strength: "a simple explanation that may be misunderstood by some." That vague praise is misleading for a mathematically false argument. This response was retained without a quality retry. Download and generation cancellation recovered with the input intact and no hosted request; the completed comparison took about three minutes on the tested AMD RDNA 3 adapter. Device mode remains experimental.
 
 ## October 2, 2026: visitor-key workflow
 

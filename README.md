@@ -2,7 +2,7 @@
 
 Compare two answers to the same question. Examine the argument each answer actually makes, check disputed claims, and review an explained verdict with exact quotations.
 
-[Use Twofold](https://twofold.alx21.chatgpt.site)
+[Use Twofold](https://twofold.alx21.chatgpt.site) · [Download source](https://github.com/agammann/twofold/releases/tag/v1.1.1) · [Verification](docs/VERIFICATION.md)
 
 ## Try a comparison
 
@@ -45,7 +45,7 @@ Only enter a key into an instance you trust. A short-lived, restricted verificat
 
 ## Run locally
 
-Use Node.js 22.12+ and npm:
+Use Node.js **24** and npm. Download `twofold_1.1.1_source.zip` and `SHA256SUMS` from Releases, verify the ZIP's SHA256 and extract it into a new folder. On Windows, `Get-FileHash .\twofold_1.1.1_source.zip -Algorithm SHA256` prints the value to compare with the checksum file. From the extracted root:
 
 ```sh
 npm ci
@@ -53,12 +53,18 @@ npm run build
 npm start
 ```
 
-Open `http://127.0.0.1:3210` or `http://localhost:3210` on the same computer. For development, run `npm run dev`. No server-side API key is required: device mode needs none, and hosted mode uses the visitor's key supplied in the UI. Environment keys are not an inference fallback.
+Open `http://127.0.0.1:3210` or `http://localhost:3210` on the same computer. Stop the server with Ctrl+C. For development, run `npm run dev`. On Windows, `start.cmd` installs missing dependencies, builds and starts the same app; it does not request a server key. The first dependency or device-model download requires internet access.
 
-Run `npm test`, `npm run build`, and `npm run check:release` before publishing. Tests cover input bounds, exact quotations, source IDs, credential separation, provider-error redaction, source imports, cancellation, and the retired operator route. Controlled transport tests are not model-accuracy benchmarks. Historical hosted evaluation results are recorded in [docs/RELIABILITY.md](docs/RELIABILITY.md).
+No server-side API key is required: device mode needs none, and hosted mode uses the visitor's key supplied in the UI. Environment keys are not an inference fallback. The retained `setup`, `test:live` and `eval:live` commands belong to the earlier provider adapter; they are not part of the current browser setup or the no-charge verification commands.
+
+Run `npm test`, `npm run build`, `npm run check:release` and `npm run audit:ci` before publishing from a Git checkout. Tests cover input bounds, exact quotations, source IDs, credential separation, provider-error redaction, source imports, cancellation, and the retired operator route. The release scan inspects staged source and therefore needs Git; running the app from an extracted ZIP does not.
+
+For the browser regression, run `npx playwright install chromium chrome`, then `npm run test:e2e` and `npm run test:webmcp`. These intercept controlled hosted responses without a provider key or paid calls. The native check requires the genuine browser API and fails if absent; `TWOFOLD_BROWSER_EXECUTABLE` selects an installed compatible Chromium executable. Controlled transport tests are not model-accuracy benchmarks. Dated real-model results are in [docs/RELIABILITY.md](docs/RELIABILITY.md).
+
+Twofold's optional native `prepare_comparison` tool fills the visible question and answers without starting inference. Review the form and submit it yourself. Ordinary use requires no native WebMCP support.
 
 The public Worker serves an explicit frontend asset allowlist, bounded source imports, and `/api/compare/visitor`. The earlier `/api/compare` operator route remains retired with HTTP 410. Existing D1 migrations remain for deployment compatibility; no model quota database is used.
 
 ## License
 
-No open source license has been selected for this repository. Contact the owner before redistribution. Model weights and third-party dependencies have their own licenses.
+[MIT](LICENSE) for the original source. Retain [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md); dependencies and separately downloaded model weights have their own terms. [Support, upgrade and recovery](docs/STABILITY.md) explains the v1 boundaries and how to preserve reports.
