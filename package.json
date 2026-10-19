@@ -22,7 +22,7 @@
     "package:source": "node scripts/package-release.mjs"
   },
   "dependencies": {
-    "express": "^5.1.0",
+    "express": "^5.3.0",
     "linkedom": "^0.18.12",
     "openai": "^6.0.0",
     "react": "^19.1.0",
