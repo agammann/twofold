@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "express": "^5.3.0",
-    "linkedom": "^0.18.13",
+    "linkedom": "^0.18.15",
     "openai": "^6.0.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
