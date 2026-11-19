@@ -1,10 +1,10 @@
 # Changelog
 
-## 1.1.2 candidate, unpublished
+## 1.1.2
 
 Record the dependency and verification-tool updates already merged after 1.1.1, including Express 5.3, React 19.3.1, Vite 8.3.8 and Playwright 1.65. Keep the source launcher's Node 24 guidance aligned with the supported setup. Add current frozen-install, production-build, controlled browser and genuine native WebMCP evidence.
 
-The required full dependency audit remains unchanged and blocks publication on the unresolved picomatch advisory. The current source release and public deployment remain 1.1.1. Device inference retains its experimental quality and hardware limits.
+Device inference retains its experimental quality and hardware limits.
 
 ## 1.1.1
 
