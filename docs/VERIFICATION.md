@@ -1,5 +1,23 @@
 # Verification evidence
 
+## November 17, 2026 candidate 1.1.2
+
+A fresh Windows checkout installed its frozen npm lock with Node 24.22.1 and npm 11.19.1. All 49 deterministic tests passed. Vite 8.3.8 built the production frontend and Worker. The release scan passed across 78 tracked files and 10 built files.
+
+The controlled browser check passed 10 groups in Chromium 158.0.8127.18. Chrome for Testing 155.0.8059.12 passed 11 groups, including the genuine native `prepare_comparison` call. The tool populated the visible form without starting inference. Both runs had no page errors. The deliberately returned HTTP 429 produced the expected browser console entry. Export, cancellation, credential clearing, source attribution and 320, 390 and 1440 pixel layouts passed. These checks used synthetic inputs and controlled hosted responses without a provider call.
+
+At the November 17 check, the required full audit reported four high entries from one Picomatch advisory propagated through fdir, tinyglobby and Vite. The advisory covered versions through 4.0.7. The registry still offered 4.0.7 and the advisory listed no patched version when checked. The result was limited to the dependency audit and held publication at the time.
+
+The available 1.1.1 source ZIP was independently downloaded and checked against its exact tag. All three assets, checksums, archive integrity and 76 source Git blobs passed. A separate extracted installation passed the production build and all 49 tests. Its earlier dependency graph has additional audit findings. The existing source release and public deployment remain unchanged.
+
+Separately, the existing public 1.1.1 application completed one real Qwen 3 4B WebGPU comparison on a fixed fictional arithmetic case. It selected A, correctly explained the $100 to $120 to $96 calculation and the invalid cancellation argument, quoted both original answers exactly and reported no web sources. The actual 3,551-byte Markdown export matched the inputs and verdict. The genuine native preparation tool returned `submitted: false` before the comparison. No API key, source URL or paid request was used. The first result was retained. This single case does not establish general model accuracy and device mode remains experimental.
+
+The sections below preserve their dated model results. No new paid provider review was requested in this pass.
+
+## November 19, 2026 dependency audit recheck
+
+GitHub withdrew the Picomatch advisory on November 18. The required dependency audit reported zero advisories on the candidate lockfile when rerun on November 19. The source candidate remains a draft. [Advisory record](https://github.com/advisories/GHSA-fc5q-39xc-vjpf)
+
 ## October 7, 2026: source release 1.1.1
 
 The current visitor-key browser workflow was checked in Chrome 155.0.8059.12 against the local production server. Three first GPT-5.4 responses covered successive percentage changes, missing observations in a sealed box, and an actual retrieved Example Domain page. A first GPT-5.4 mini response covered the same missing-observation case. Inputs and factual criteria were fixed before inference; each verdict and the required reasoning/source distinctions matched them. Actual Markdown exports matched the displayed reports. This is a small development check, not general model accuracy or verification of the public deployment.
