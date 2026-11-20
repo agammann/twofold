@@ -4,7 +4,7 @@ Compare two answers to the same question. Examine the argument each answer actua
 
 [Use Twofold](https://twofold.alx21.chatgpt.site) · [Download source](https://github.com/agammann/twofold/releases/tag/v1.1.1) · [Verification](docs/VERIFICATION.md)
 
-The 1.1.2 source candidate remains unpublished while the required dependency audit is blocked by an upstream advisory without a published patch. The available source release is 1.1.1. See the [current verification record](docs/VERIFICATION.md) for the candidate checks and delivery hold.
+Version 1.1.2 is an unpublished source candidate. Version 1.1.1 is the available source release. See the [verification record](docs/VERIFICATION.md) for the candidate checks.
 
 ## Try a comparison
 
