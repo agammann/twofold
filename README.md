@@ -4,6 +4,8 @@ Compare two answers to the same question. Examine the argument each answer actua
 
 [Use Twofold](https://twofold.alx21.chatgpt.site) · [Download source](https://github.com/agammann/twofold/releases/tag/v1.1.1) · [Verification](docs/VERIFICATION.md)
 
+Version 1.1.2 is an unpublished source candidate. Version 1.1.1 is the available source release. See the [verification record](docs/VERIFICATION.md) for the candidate checks.
+
 ## Try a comparison
 
 1. Start with **OpenAI with your key**, or choose the experimental **On this device** option.
